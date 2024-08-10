@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification Success</title>
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: #f2f3f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #20e277;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #455056;
+            font-size: 16px;
+            line-height: 24px;
+            margin: 0 0 20px;
+        }
+
+        a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 15px 30px;
+            background: #20e277;
+            display: inline-block;
+            border-radius: 5px;
+            text-align: center;
+            transition: background 0.3s ease;
+        }
+
+        a:hover {
+            background: #1bce70;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #20e277;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+      {% if status == 0 %}
+        <div class="success-icon">&#10004;</div>
+        <h1>Email Verified Successfully</h1>
+        <p>Your email has been successfully verified. You can now access your account.</p>
+        <a href="{{web_login}}">Go to Login</a>
+      {% else %}
+        <div class="error-icon">&#10004;</div>
+        <h1>Email Verification Failed</h1>
+        <p>Failed To Verify Email. Retry Email Verification</p>
+        <a href="{{web_login}}">Retry Verification</a>
+      {% endif %}
+    </div>
+</body>
+
+</html>
