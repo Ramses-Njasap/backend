@@ -12,7 +12,7 @@ from urllib.parse import unquote
 from accounts.managers.users import (CreateUserManager, GetUserManager, VerifyUserManager)
 
 from utilities import response
-from utilities.generators.string_generators import (generate_username, QueryID, Keys)
+from utilities.generators.string_generators import (generate_name, QueryID, Keys)
 
 
 class BannedPhoneNumber(models.Model):
@@ -225,10 +225,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             
         else:
 
-            self.username = f'@{generate_username()}'
+            self.username = f'@{generate_name()}'
 
             while User.objects.filter(username=self.username).exists():
-                self.username = f'@{generate_username()}'
+                self.username = f'@{generate_name()}'
 
         # 
         # Building user_id_generator parameters

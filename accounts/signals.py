@@ -2,6 +2,7 @@ from django.db.models.signals import post_save
 from django.apps import apps
 from django.dispatch import receiver
 
+from accounts.models.settings import UserSettings
 from accounts.models.mlm_user import MLMUser
 from accounts.models.profiles import UserProfile
 from accounts.models.devices import DeviceWallet
@@ -16,6 +17,7 @@ def create_profile_and_referral(sender, instance, created, **kwargs):
     Signal handler to create a UserProfile and Referral instance for a new user.
     """
     if created:
+        UserSettings.objects.create(user=instance)
         UserProfile.objects.create(user=instance)
         real_estate_certifications_instance = RealEstateCertification.objects.create(user=instance)
         kyc_verification_check_instance = KYCVerificationCheck.objects.create(user=instance,
@@ -44,9 +46,4 @@ def create_user_device(sender, instance, created, **kwargs):
         instance.wallet = device_wallet_instance
 
         # Creating Device Tokens
-        device_auth_instance = DeviceAuthenticator(instance=instance, database_actions=True)
-
-        is_generated = device_auth_instance.generate_tokens()
-
-        if is_generated is None:
-            ...
+        DeviceAuthenticator(instance=instance, database_actions=True).generate_tokens()

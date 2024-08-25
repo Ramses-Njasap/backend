@@ -89,11 +89,11 @@ class IPAddressAnalyzer:
             'total_probability_score': total_score
         }
 
-# Example usage
-base_ip = '127.0.0.1'
-ip_list = ['192.168.1.20', '192.168.1.30', '192.168.2.10', '192.168.1.40', '192.168.1.40']
+# # Example usage
+# base_ip = '127.0.0.1'
+# ip_list = ['192.168.1.20', '192.168.1.30', '192.168.2.10', '192.168.1.40', '192.168.1.40']
 
-analyzer = IPAddressAnalyzer(base_ip, octet_count=2, n_clusters=2, similarity_threshold=100)
-analysis_results = analyzer.analyze(ip_list)
+# analyzer = IPAddressAnalyzer(base_ip, octet_count=2, n_clusters=2, similarity_threshold=100)
+# analysis_results = analyzer.analyze(ip_list)
 
-print(f"Analysis results: {analysis_results}")
+# print(f"Analysis results: {analysis_results}")

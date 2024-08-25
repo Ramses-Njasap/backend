@@ -53,18 +53,18 @@ class QueryID:
         return None
 
 
-def generate_username():
+def generate_name():
 
-    # Generate a random username by combining a random adjective and noun, with a random number at the end
+    # Generate a random name by combining a random adjective and noun, with a random number at the end
     while True:
         noun = 'lalouge-user'
         number = random.randint(100000, 999999)
-        username = f'{noun}{number}'
+        name = f'{noun}{number}'
         
-        if len(username) <= 18:
+        if len(name) <= 18:
             break
 
-    return username
+    return name
 
 
 

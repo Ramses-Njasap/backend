@@ -1,0 +1,29 @@
+[
+    {
+      "model": "configurations.currencies",
+      "pk": 1,
+      "fields": {
+        "name": "United States Dollar",
+        "symbol": "$",
+        "code": "USD"
+      }
+    },
+    {
+      "model": "yourapp.currencies",
+      "pk": 2,
+      "fields": {
+        "name": "Euro",
+        "symbol": "€",
+        "code": "EUR"
+      }
+    },
+    {
+      "model": "yourapp.currencies",
+      "pk": 3,
+      "fields": {
+        "name": "Japanese Yen",
+        "symbol": "¥",
+        "code": "JPY"
+      }
+    }
+]  

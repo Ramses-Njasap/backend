@@ -1,0 +1,30 @@
+[
+    {
+      "model": "configurations.languages",
+      "pk": 1,
+      "fields": {
+        "name": "English",
+        "code": "EN",
+        "flag": "🇬🇧"
+      }
+    },
+    {
+      "model": "configurations.languages",
+      "pk": 2,
+      "fields": {
+        "name": "French",
+        "code": "FR",
+        "flag": "🇫🇷"
+      }
+    },
+    {
+      "model": "configurations.languages",
+      "pk": 3,
+      "fields": {
+        "name": "Spanish",
+        "code": "ES",
+        "flag": "🇪🇸"
+      }
+    }
+]
+  

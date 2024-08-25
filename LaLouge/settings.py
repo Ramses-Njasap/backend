@@ -68,6 +68,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
 ]
 
 # Apps installed using `pip3 install <package>`
@@ -89,6 +90,8 @@ START_APPS = [
     'accounts.apps.AccountsConfig',
     'utilities.apps.UtilitiesConfig',
     'admin_management.apps.AdminManagementConfig',
+    'configurations.apps.ConfigurationsConfig',
+    'properties.apps.PropertiesConfig',
 ]
 
 INSTALLED_APPS += DJANGO_APPS + START_APPS
@@ -232,12 +235,12 @@ DEVICE_JWT = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'lalouge',
         'USER': 'admin',
         'PASSWORD': '2632',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5432',
     }
 }
 
@@ -328,6 +331,9 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 SMS_USER = os.environ.get("SMS_USER")
 SMS_PASSWORD = os.environ.get("SMS_PASSWORD")
 
+# EXHANGE RATE API SETTING\
+EXCHANGE_RATE_API=os.environ.get("EXCHANGE_RATE_API", None)
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -367,7 +373,8 @@ APPLICATION_SETTINGS = {
     "REQUEST_LOGIN_OTP": {
         "BASE": "api/actions/",
         "URL": "request/login-otp/"
-    }
+    },
+    "MABBOX_API_KEY": os.environ.get('MAPBOX_API_KEY', None)
 }
 
 ANYMAIL = {
@@ -385,6 +392,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "utilities.tasks.clean_up_unverified_accounts",
         "schedule": 1209600, # Exactly 14 days in seconds (3600s = 1hour, 3600s * 24hours = 1day, 14days = 1209600seconds)
     },
+    "fetch_currency_exchange_rates": {
+        "task": "configurations.tasks.update_exchange_rates_cache",
+        "schedule": 3600
+    }
 }
 
 

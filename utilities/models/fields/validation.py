@@ -19,16 +19,16 @@ They'll be used to carry out checks in different files.
 Changing the values requires doing the change everywhere else
 """
 
-class UsernameValidation:
-    def __init__(self, username: str, uniqueness: bool = True, pattern: bool = True):
-        self.username = username
+class NameValidation:
+    def __init__(self, name: str, uniqueness: bool = True, pattern: bool = True):
+        self.name = name
         self.uniqueness = uniqueness
         self.pattern = pattern
 
     def validate_uniqueness(self) -> tuple:
 
-        if User.verify.username_exists(self.username):
-            return False, "USERNAME_CONFLICT", 409
+        if User.verify.name_exists(self.name):
+            return False, "NAME_CONFLICT", 409
         return True, "USERNAME_ACCEPTED", 202
     
     def validate_pattern(self) -> tuple:

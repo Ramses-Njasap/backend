@@ -106,7 +106,7 @@ class Verification:
             model_otp_instance = self.model.objects.get(user=self.user)
         except self.model.DoesNotExist:
             field_message = "OTP Was Not Created For This User"
-            for_developer = f"OTP For Corresponding Model ({self.model}) Was Not Created For User ({self.user.username})"
+            for_developer = f"OTP For Corresponding Model ({self.model}) Was Not Created For User ({self.user.name})"
 
             # Raising error responses
             response.errors(field_error=field_message, for_developer=for_developer,
@@ -311,7 +311,7 @@ class OTP:
 
 
 class Password:
-    def __init__(self, user:User):
+    def __init__(self, user: User):
         self.user = user
 
     def reset(self) -> bool:

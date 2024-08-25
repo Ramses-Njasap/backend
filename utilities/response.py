@@ -7,7 +7,8 @@ from asgiref.sync import async_to_sync
 
 # pass request
 def errors(field_error: str, for_developer=None, code: str = "BAD_REQUEST",
-           status_code: int = 400, main_thread=True, param=None):
+           status_code: int = 400, main_thread: bool =True, param=None, notification: bool = False,
+           app=None):
 
     error = {
         "message": {
