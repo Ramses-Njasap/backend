@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django.conf import settings
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.devices import Device, DeviceToken, DeviceTokenBlacklist
 
 from utilities import response
@@ -15,7 +15,7 @@ import jwt, hashlib
 
 
 class UserAuthToken:
-    def __init__(self, user: User = None) -> tuple:
+    def __init__(self, user: AuthCredential = None) -> tuple:
         self.user = user
 
     def get_token_expiration_date(self, token):
@@ -86,7 +86,7 @@ class DeviceAuthenticator:
     def __init__(self, secret_key=settings.DEVICE_JWT["SIGNING_KEY"], 
                  access_token_lifetime=settings.DEVICE_JWT["ACCESS_TOKEN_LIFETIME"], 
                  refresh_token_lifetime=settings.DEVICE_JWT["REFRESH_TOKEN_LIFETIME"],
-                 database_actions=True, user_instance: User = None, instance: Device = None):
+                 database_actions=True, user_instance: AuthCredential = None, instance: Device = None):
         
         self.secret_key = secret_key
         self.access_token_lifetime = access_token_lifetime

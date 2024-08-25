@@ -33,16 +33,16 @@ class BannedEmail(models.Model):
         return f"{self.email} (Banned on {self.datetime_banned})"
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class AuthCredential(AbstractBaseUser, PermissionsMixin):
     
-    class UserType(models.TextChoices):
+    class Type(models.TextChoices):
         BUYER = "BUYER", "buyer"
         INVESTOR = "INVESTOR", "investor"
         AGENT = "AGENT", "agent"
         COMPANY = "COMPANY", 'company'
         EXTERNAL = 'EXTERNAL', 'external'
 
-    user_type = models.CharField(max_length=15, choices=UserType.choices, default=UserType.BUYER, db_index=True)
+    type = models.CharField(max_length=15, choices=Type.choices, default=Type.BUYER, db_index=True)
     username = models.CharField(max_length=19, unique=True, db_index=True)
     email = models.EmailField(blank=True, unique=True, null=True)
     phone = models.CharField(blank=True, unique=True, null=True, max_length=16)
@@ -186,7 +186,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         query_id_instance = QueryID()
         query_id = query_id_instance.query_id(query_id=query_id)
 
-        return User.objects.filter(
+        return AuthCredential.objects.filter(
             Q(username__icontains=query) |
             Q(phone__icontains=query)
         )
@@ -220,21 +220,21 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.username = f'@{username}'
 
             # Check if the username already exists
-            if User.objects.filter(username=self.username).exclude(pk=self.pk).exists():
+            if AuthCredential.objects.filter(username=self.username).exclude(pk=self.pk).exists():
                 raise ValidationError({'error': 'Username already exists.'})
             
         else:
 
             self.username = f'@{generate_name()}'
 
-            while User.objects.filter(username=self.username).exists():
+            while AuthCredential.objects.filter(username=self.username).exists():
                 self.username = f'@{generate_name()}'
 
         # 
         # Building user_id_generator parameters
         # 
 
-        data = [self.user_type, self.username, self.phone, str(uuid.uuid5)]
+        data = [self.type, self.username, self.phone, str(uuid.uuid5)]
         data_length = sum(len(item) for item in data)
 
         # 
@@ -253,4 +253,4 @@ class User(AbstractBaseUser, PermissionsMixin):
         key_instance = Keys(filtered_user_data, _type="secret")
         self.secret_key = key_instance.generate()
 
-        super(User, self).save(*args, **kwargs)
+        super(AuthCredential, self).save(*args, **kwargs)

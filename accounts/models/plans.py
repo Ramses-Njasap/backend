@@ -1,7 +1,7 @@
 from django.db import models
 from decimal import Decimal
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from accounts.managers.plans import SubscriptionPlanManager
 
@@ -103,7 +103,7 @@ class UserSubscriptionPlan(models.Model):
         SubscriptionDuration.LIFETIME: "LIFE TIME"
     }
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(AuthCredential, on_delete=models.CASCADE)
     plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True)
     duration = models.CharField(max_length=9, choices=SubscriptionDuration.choices,
                                              default=SubscriptionDuration.MONTHLY)

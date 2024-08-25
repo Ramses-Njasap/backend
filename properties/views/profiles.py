@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from accounts.models.profiles import UserProfile
 from accounts.serializers.profiles import UserProfileSerializer
@@ -30,8 +30,8 @@ class UserProfileView(APIView):
         if query_id:
 
             try:
-                user_instance = User.get_user(query_id)
-            except User.DoesNotExist:
+                user_instance = AuthCredential.get_user(query_id)
+            except AuthCredential.DoesNotExist:
                 response.errors(
                     field_error="User Not Found",
                     for_developer=f"No User With QueryID {query_id} Exists",

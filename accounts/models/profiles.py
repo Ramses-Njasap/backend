@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group as BaseGroup
 from django.core.validators import (RegexValidator, MinLengthValidator)
 from django.utils.translation import gettext_lazy as _
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.managers.profiles import UserProfileManager
 
 from utilities import response
@@ -50,7 +50,7 @@ class UserProfile(models.Model):
     # user_profile = UserProfile.objects.create(user=user_instance)
     # user_profile.statuses.add(Status.REALTOR, Status.STUDENT)
     statuses = models.JSONField(default=default_statuses)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(AuthCredential, on_delete=models.CASCADE)
     groups = models.ManyToManyField(Group, related_name="students", blank=True)
     phone = models.CharField(null=True, blank=True, max_length=16,
                              validators=[

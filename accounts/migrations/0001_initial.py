@@ -124,7 +124,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('user_type', models.CharField(choices=[('BUYER', 'buyer'), ('INVESTOR', 'investor'), ('AGENT', 'agent'), ('COMPANY', 'company'), ('EXTERNAL', 'external')], db_index=True, default='BUYER', max_length=15)),
+                ('type', models.CharField(choices=[('BUYER', 'buyer'), ('INVESTOR', 'investor'), ('AGENT', 'agent'), ('COMPANY', 'company'), ('EXTERNAL', 'external')], db_index=True, default='BUYER', max_length=15)),
                 ('username', models.CharField(db_index=True, max_length=19, unique=True)),
                 ('email', models.EmailField(blank=True, max_length=254, null=True, unique=True)),
                 ('phone', models.CharField(blank=True, max_length=16, null=True, unique=True)),

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from utilities.serializers.fields import EmailOrPhoneSerializer
 
@@ -25,7 +25,7 @@ class LoginCredentialSerializer(serializers.Serializer):
         password = data.get('password')
 
         # Check if the input is an email or a phone number
-        user = User.objects.filter(
+        user = AuthCredential.objects.filter(
             models.Q(email=email_or_phone) | models.Q(phone=email_or_phone)
         ).first()
 
@@ -70,7 +70,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         if match:
             try:
-                user = User.objects.get(phone=phone)
+                user = AuthCredential.objects.get(phone=phone)
             except:
                 raise serializers.ValidationError("Phone number does not exist")
 

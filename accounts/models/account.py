@@ -17,21 +17,21 @@ class OTP(models.Model):
 
 
 class LoginOTP(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    user = models.OneToOneField('AuthCredential', on_delete=models.CASCADE)
     used_otp = models.ManyToManyField('OTP', through='UsedOTP', related_name='login_otp')
     current_otp = models.OneToOneField('OTP', on_delete=models.DO_NOTHING, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
 class PhoneNumberVerificationOTP(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    user = models.OneToOneField('AuthCredential', on_delete=models.CASCADE)
     used_otp = models.ManyToManyField('OTP', through='UsedOTP', related_name='phone_number_used_otp')
     current_otp = models.OneToOneField('OTP', on_delete=models.DO_NOTHING, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
 class EmailVerificationOTP(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    user = models.OneToOneField('AuthCredential', on_delete=models.CASCADE)
     used_otp = models.ManyToManyField('OTP', through='UsedOTP', related_name='email_used_otp')
     current_otp = models.OneToOneField('OTP', on_delete=models.DO_NOTHING, null=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -60,7 +60,7 @@ class OTPModels:
 
 
 class RealEstateCertification(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    user = models.OneToOneField('AuthCredential', on_delete=models.CASCADE)
 
 
 class KYCVerificationCheck(models.Model):
@@ -71,7 +71,7 @@ class KYCVerificationCheck(models.Model):
         DRIVER_LICENSE_VERIFIED = 20
         REAL_ESTATE_CERTIFICATIONS = 100
 
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    user = models.OneToOneField('AuthCredential', on_delete=models.CASCADE)
     id_card_verified = models.BooleanField(default=False)
     passport_verified = models.BooleanField(default=False)
     driver_license_verified = models.BooleanField(default=False)
@@ -102,7 +102,7 @@ class AccountVerification(models.Model):
         PHONE_NUMBER_VERIFIED = 10
         KYC_VERIFICATION_CHECK = 80
 
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    user = models.OneToOneField('AuthCredential', on_delete=models.CASCADE)
     email_verified = models.BooleanField(default=False)
     phone_number_verified = models.BooleanField(default=False)
     kyc_verification_check = models.OneToOneField('KYCVerificationCheck', on_delete=models.DO_NOTHING, null=True, blank=True)

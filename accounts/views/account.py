@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.account import PhoneNumberVerificationOTP, EmailVerificationOTP
 
 from accounts.serializers.users import UserSerializer
@@ -47,10 +47,10 @@ class VerificationView(APIView):
 
         verification_type = self.request.GET.get("verify", None)
 
-        user_exists = User.check_existence(query_id=query_id)
+        user_exists = AuthCredential.check_existence(query_id=query_id)
 
         if user_exists:
-            user_instance = User.get_user(query_id=query_id)
+            user_instance = AuthCredential.get_user(query_id=query_id)
 
             if verification_type and (verification_type.lower() == "phone" or verification_type.lower() == "email"):
 

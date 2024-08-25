@@ -1,5 +1,5 @@
 from django.contrib import admin
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.mlm_user import MLMUser
 from accounts.models.profiles import UserProfile
 from accounts.models.plans import SubscriptionPlan, UserSubscriptionPlan
@@ -11,7 +11,7 @@ from accounts.models.devices import (DeviceLoginHistory, DeviceTokenBlacklist, D
 
 
 # Register your models here.
-admin.site.register(User)
+admin.site.register(AuthCredential)
 admin.site.register(MLMUser)
 admin.site.register(UserProfile)
 admin.site.register(SubscriptionPlan)

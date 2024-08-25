@@ -3,7 +3,7 @@ from utilities.models.relationship_checker import ModelRelationshipChecker
 from utilities.account import OTP as _OTP
 
 from accounts.models.account import OTP, UsedOTP, OTPModels
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -15,7 +15,7 @@ import random
 
 
 class OTPGenerator:
-    def __init__(self, secret_key: str, model: models.Model, user: User = None, req: bool = False, save: bool = True):
+    def __init__(self, secret_key: str, model: models.Model, user: AuthCredential = None, req: bool = False, save: bool = True):
         self.secret_key = secret_key
         self.model = model
         self.user = user

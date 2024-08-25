@@ -1,4 +1,4 @@
-from accounts.models.users import (BannedPhoneNumber, BannedEmail, User)
+from accounts.models.auth import (BannedPhoneNumber, BannedEmail, AuthCredential)
 from accounts.models.profiles import UserProfile
 from accounts.models.plans import (SubscriptionPlan, CustomPlan, 
                                   UserSubscriptionPlan)

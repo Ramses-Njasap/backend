@@ -1,10 +1,10 @@
 from django.db import models
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from configurations.models.currencies import Currencies
 from configurations.models.languages import Languages
 
 class UserSettings(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.OneToOneField(AuthCredential, on_delete=models.CASCADE, null=False, blank=False)
     preferred_currency = models.ForeignKey(Currencies, on_delete=models.DO_NOTHING)
     preferred_language = models.ForeignKey(Languages, on_delete=models.DO_NOTHING)
 

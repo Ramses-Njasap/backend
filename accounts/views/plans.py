@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from accounts.models.plans import SubscriptionPlan, UserSubscriptionPlan
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from accounts.serializers.plans import UserSubscriptionPlanSerializer
 
@@ -65,7 +65,7 @@ class UserSubscriptionPlanView(APIView):
         
         if user_query_id:
             try:
-                user_instance = User.get_user(query_id=user_query_id)
+                user_instance = AuthCredential.get_user(query_id=user_query_id)
             except base64.binascii.Error as e:
                 # setting error messages for user nad developer respectively
                 field_message = "Server Error. Contact Customer Support."

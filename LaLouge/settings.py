@@ -301,7 +301,7 @@ CELERY_RESULT_EXTENDED = True
 
 
 # User model / to determine the model used for authentication
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.AuthCredential'
 
 # Set the email backend to use the SMTP backend
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

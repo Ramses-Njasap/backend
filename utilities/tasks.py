@@ -1,5 +1,5 @@
 # your_app/tasks.py
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.account import PhoneNumberVerificationOTP, EmailVerificationOTP
 
 from celery import shared_task

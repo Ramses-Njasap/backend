@@ -11,7 +11,7 @@ from accounts.models.account import (AccountVerification, KYCVerificationCheck, 
 from utilities.generators.tokens import DeviceAuthenticator
 
 
-@receiver(post_save, sender=apps.get_model('accounts', 'User'))
+@receiver(post_save, sender=apps.get_model('accounts', 'AuthCredential'))
 def create_profile_and_referral(sender, instance, created, **kwargs):
     """
     Signal handler to create a UserProfile and Referral instance for a new user.

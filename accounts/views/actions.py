@@ -14,7 +14,7 @@ from utilities.generators.string_generators import QueryID
 from utilities import response
 
 # Importing `models` Modules From Package `accounts.models`
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.account import LoginOTP
 from accounts.models.devices import Device, DeviceLoginHistory
 
@@ -152,7 +152,7 @@ class RequestLoginOTP(APIView):
     def get_user_instance(self, email_or_phone: str):
 
         # Checking if the input is an email or a phone number
-        user_instance = User.objects.filter(
+        user_instance = AuthCredential.objects.filter(
             models.Q(email=email_or_phone) | models.Q(phone=email_or_phone)
         ).first()
 
@@ -214,7 +214,7 @@ class ChangePasswordAPI(APIView):
 
     # Cannot use validate_password function name since it is already an inbuilt serializer function name
     # following the serializer validate function naming pattern validate_{field_name}
-    def validate_user_password(self, value: str, user_instance: User = None):
+    def validate_user_password(self, value: str, user_instance: AuthCredential = None):
         if user_instance:
             filtered_data = {key: value for key, value in user_instance.__dict__.items() if key != 'password'}
 

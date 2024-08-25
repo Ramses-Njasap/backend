@@ -6,7 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status, serializers
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.devices import Device, DeviceToken, DeviceLoginHistory
 
 from utilities.generators.tokens import DeviceAuthenticator
@@ -103,7 +103,7 @@ class DeviceAuthPermission(BasePermission):
     def get_user_by_query_id(self, request):
         query_id = request.GET.get("query-id", None)
 
-        user_instance = User.get_user(query_id=query_id)
+        user_instance = AuthCredential.get_user(query_id=query_id)
 
         return user_instance
     
@@ -119,7 +119,7 @@ class DeviceAuthPermission(BasePermission):
         email_or_phone = request_data["email_or_phone"]
 
         # Check if the input is an email or a phone number
-        user_instance = User.objects.filter(
+        user_instance = AuthCredential.objects.filter(
             models.Q(email=email_or_phone) | models.Q(phone=email_or_phone)
         ).first()
 

@@ -5,7 +5,7 @@ from utilities.models.fields import validation
 from utilities import response
 from utilities.generators.otp import OTPGenerator
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.account import PhoneNumberVerificationOTP, EmailVerificationOTP
 
 import time, base64
@@ -28,8 +28,8 @@ class UserSerializer(serializers.ModelSerializer):
         return None
 
     class Meta:
-        model = User
-        fields = ('user_type', 'username', 'email', 'phone', 'is_staff', 'is_admin', 'is_superuser',
+        model = AuthCredential
+        fields = ('type', 'username', 'email', 'phone', 'is_staff', 'is_admin', 'is_superuser',
                   'is_verified', 'is_mlm_user', 'is_external_user', 'is_account_visible',
                   'is_account_locked', 'is_online', 'is_account_blocked', 'is_account_deleted',
                   'datetime_joined', 'datetime_updated', 'last_login', 'last_logout', 'query_id', 'password')
@@ -40,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
         extra_kwargs = {
-            'user_type': {'required': False},
+            'type': {'required': False},
             'username': {'required': False},
             'phone': {'required': False},
             'password': {
@@ -122,7 +122,7 @@ class UserSerializer(serializers.ModelSerializer):
             password = self.validate_user_password(password, validated_data)
         
         # Create (new) user instance
-        user_instance = User.create_user(phone=phone, **validated_data)
+        user_instance = AuthCredential.create_user(phone=phone, **validated_data)
         user_instance.set_password(password)
 
         if email:

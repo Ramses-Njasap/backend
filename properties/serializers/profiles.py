@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from properties.models.profiles import UserProfiles
+from properties.models.profiles import UserProfile
 
 from accounts.serializers.profiles import UserProfileSerializer
 
@@ -10,7 +10,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.SerializerMethodField()
 
     class Meta:
-        model = UserProfiles
+        model = UserProfile
         fields = ("statuses", "user", 'user_type')
 
     def name(self, obj):
@@ -34,7 +34,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         Returns:
             UserProfile: Created UserProfile instance.
         """
-        user_profile = UserProfiles.objects.create(**validated_data)
+        user_profile = UserProfile.objects.create(**validated_data)
         return user_profile
 
     def update(self, instance, validated_data):

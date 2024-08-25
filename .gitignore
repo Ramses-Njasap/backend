@@ -1,2 +1,8 @@
-/.env
 __pycache__/
+# Ignore env files
+.env
+# Ignore all migration files
+migrations/*
+
+# Do not ignore __init__.py
+!migrations/__init__.py

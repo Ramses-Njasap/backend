@@ -6,7 +6,7 @@ from rest_framework import status
 from django.core.paginator import Paginator
 
 # Import models from accounts models
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.devices import Device, DeviceLoginHistory
 from accounts.models.account import PhoneNumberVerificationOTP, EmailVerificationOTP
 
@@ -253,7 +253,7 @@ class UserAPIView(APIView):
     def get(self, request):
 
         # Retrieve all user instances and serialize them for response
-        user_instances = User.objects.all()
+        user_instances = AuthCredential.objects.all()
 
         serializer = UserSerializer(user_instances, many=True)
 

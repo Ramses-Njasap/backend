@@ -1,18 +1,19 @@
 from django.db import models
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.profiles import UserProfile
 from properties.models.profiles import Profiles
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
+
 class CreateProfile(AsyncWebsocketConsumer):
 
     @sync_to_async
     def get_user_instance(self, user_query_id) -> models.Model:
         try:
-            user_instance = User.get_user(query_id=user_query_id)
-        except User.DoesNotExist:
+            user_instance = AuthCredential.get_user(query_id=user_query_id)
+        except AuthCredential.DoesNotExist:
             return None
         return user_instance.pk
     
@@ -26,7 +27,7 @@ class CreateProfile(AsyncWebsocketConsumer):
     
     @sync_to_async
     def create_profile(self, user_query_id, profile_data):
-        user_instance = User.objects.get(pk=user_query_id)
+        user_instance = AuthCredential.objects.get(pk=user_query_id)
         profile = Profiles.objects.create(
             user=user_instance
         )

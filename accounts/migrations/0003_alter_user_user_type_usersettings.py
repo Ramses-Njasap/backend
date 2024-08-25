@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterField(
             model_name='user',
-            name='user_type',
+            name='type',
             field=models.CharField(choices=[('INTERNAL', 'internal'), ('EXTERNAL', 'external')], db_index=True, default='INTERNAL', max_length=15),
         ),
         migrations.CreateModel(

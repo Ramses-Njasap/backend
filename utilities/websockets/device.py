@@ -1,4 +1,4 @@
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -11,7 +11,7 @@ class DeviceConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def get_user_id(self, user_query_id):
         try:
-            user_instance = User.get_user(query_id=user_query_id)
+            user_instance = AuthCredential.get_user(query_id=user_query_id)
         except:
             return None
         

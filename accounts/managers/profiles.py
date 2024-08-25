@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from utilities import response
 
@@ -85,7 +85,7 @@ class UserProfileManager(models.Manager):
     def get_active_profile(self, query_id: str = None, auto: bool = True, *args, **kwargs) -> models.Model:
         logger.debug("Debug::: {}".format(query_id))
         if query_id:
-            query_id = User.get_user(query_id=query_id).query_id
+            query_id = AuthCredential.get_user(query_id=query_id).query_id
             logger.debug("DEBUG2::: {}".format(query_id))
 
         if not auto:

@@ -4,7 +4,7 @@ from django.db import models
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from utilities import response
 
@@ -27,7 +27,7 @@ class NameValidation:
 
     def validate_uniqueness(self) -> tuple:
 
-        if User.verify.name_exists(self.name):
+        if AuthCredential.verify.name_exists(self.name):
             return False, "NAME_CONFLICT", 409
         return True, "USERNAME_ACCEPTED", 202
     
@@ -78,7 +78,7 @@ class EmailValidation:
         self.pattern = pattern
     
     def validate_uniqueness(self) -> tuple:
-        if User.verify.email_exists(self.email):
+        if AuthCredential.verify.email_exists(self.email):
             return False, "EMAIL_CONFLICT",  409, f"User With This Email ({self.email}) Already Exists"
         return True, "EMAIL_ACCEPTED", 202, f"This Email ({self.email}) Is Unique"
     
@@ -158,7 +158,7 @@ class PhoneValidation:
         self.pattern = pattern
 
     def validate_uniqueness(self) -> tuple:
-        if User.verify.phone_exists(self.phone):
+        if AuthCredential.verify.phone_exists(self.phone):
             return False, "PHONE_CONFLICT", 409
         return True, "PHONE_ACCEPTED", 202
     

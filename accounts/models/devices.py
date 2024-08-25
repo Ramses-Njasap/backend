@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from accounts.managers.devices import DeviceManager
 
@@ -68,7 +68,7 @@ class Device(models.Model):
         OTHER = "OTHER", _("Other")
         UNDEFINED = "UNDEFINED", _("Undefined")
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(AuthCredential, on_delete=models.CASCADE)
 
     user_agent = models.TextField(null=True)
 

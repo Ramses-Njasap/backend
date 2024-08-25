@@ -27,7 +27,7 @@ from django.db import models
 from decimal import Decimal, ROUND_DOWN
 from django.db.models import Sum, F
 
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 
 from utilities.generators.string_generators import QueryID
 
@@ -35,7 +35,7 @@ import random, string, uuid
 
 
 class MLMUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, db_index=True)
+    user = models.OneToOneField(AuthCredential, on_delete=models.CASCADE, db_index=True)
 
     # Referral code to use during login for potential downliners
     referral_code = models.CharField(max_length=255, unique=True, db_index=True)
@@ -53,7 +53,7 @@ class MLMUser(models.Model):
     def __str__(self):
         return self.user.username
 
-    def calculate_recruiter_commission(self, amount: Decimal = Decimal('0.00'), recruiter: User = None) -> Decimal:
+    def calculate_recruiter_commission(self, amount: Decimal = Decimal('0.00'), recruiter: AuthCredential = None) -> Decimal:
         # Calculate the commission for the recruiter
         commission_percentage = recruiter.subscription_plan.new_user_commission_percentage
         
@@ -61,7 +61,7 @@ class MLMUser(models.Model):
 
         return Decimal(commission)
 
-    def recruit(self, new_user: User = None):
+    def recruit(self, new_user: AuthCredential = None):
         # Method to add a new recruit efficiently
         new_mlm_user = MLMUser(user=new_user, level=0)  # Set the new user's level to zero
         new_mlm_user.save()

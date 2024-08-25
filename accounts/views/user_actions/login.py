@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 # Import models from accounts models
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.account import LoginOTP
 
 # Import serializers from accounts serializer
@@ -268,7 +268,7 @@ class LoginWithCode:
         
         return
     
-    def check_verification_validity(self, otp: str, user_instance: User,
+    def check_verification_validity(self, otp: str, user_instance: AuthCredential,
                                     database_actions: bool = False, send_update: bool = False) -> bool:
    
         _otp_instance = _OTP(otp=otp, user=user_instance, model=LoginOTP, database_actions=database_actions,
@@ -290,7 +290,7 @@ class LoginWithCode:
         email_or_phone = request_data["email_or_phone"]
 
         # Check if the input is an email or a phone number
-        user_instance = User.objects.filter(
+        user_instance = AuthCredential.objects.filter(
             models.Q(email=email_or_phone) | models.Q(phone=email_or_phone)
         ).first()
 

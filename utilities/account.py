@@ -1,4 +1,4 @@
-from accounts.models.users import User
+from accounts.models.auth import AuthCredential
 from accounts.models.devices import Device
 from accounts.models.account import (PhoneNumberVerificationOTP, EmailVerificationOTP, LoginOTP,
                                      UsedOTP, OTPModels, AccountVerification, KYCVerificationCheck,
@@ -21,7 +21,7 @@ from utilities.tasks import send_email_task, send_sms_task
 
 
 class Verification:
-    def __init__(self, user: User, model: models.Model = PhoneNumberVerificationOTP,
+    def __init__(self, user: AuthCredential, model: models.Model = PhoneNumberVerificationOTP,
                  check_verification: bool = False):
         self.user = user
         self.model = model
@@ -133,7 +133,7 @@ class CheckVerifiedCredentials:
         Device Validity which starts from 30% Trust to The existence Of the Device Token To A Valid Device Name
         Then Extras Such As KYC
     """
-    def __init__(self, user_instance: User):
+    def __init__(self, user_instance: AuthCredential):
         self.user = user_instance
     
     def is_phone_email_verified(self, check_device=False, **kwargs):
@@ -181,7 +181,7 @@ class CheckVerifiedCredentials:
     
 
 class OTP:
-    def __init__(self, otp: str = None, user: User = None, model: models.Model = PhoneNumberVerificationOTP, database_actions=True,
+    def __init__(self, otp: str = None, user: AuthCredential = None, model: models.Model = PhoneNumberVerificationOTP, database_actions=True,
                  send_update=True):
         self.otp = otp
         self.user = user
@@ -311,7 +311,7 @@ class OTP:
 
 
 class Password:
-    def __init__(self, user: User):
+    def __init__(self, user: AuthCredential):
         self.user = user
 
     def reset(self) -> bool:
