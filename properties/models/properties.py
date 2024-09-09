@@ -1,6 +1,6 @@
 from django.db import models
 
-from configurations.models.currencies import Currencies
+from configurations.models.currency import Currency
 from configurations.utilities.currencies import ExchangeRates
 
 from decimal import Decimal
@@ -36,7 +36,7 @@ class Properties(models.Model):
     availability = models.CharField(max_length=50, choices=AvailabilityStatus.choices, default=AvailabilityStatus.NOT_AVAILABLE)
     address = ...
     cost = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.ForeignKey(Currencies, on_delete=models.DO_NOTHING)
+    currency = models.ForeignKey(Currency, on_delete=models.DO_NOTHING)
     exchange_rate_from_usd_upon_upload = models.DecimalField(max_digits=10, decimal_places=2)
     number_of_shares = models.IntegerField(default=0)
     number_of_views = models.IntegerField(default=0)
@@ -75,9 +75,9 @@ class Properties(models.Model):
     def save(self, *args, **kwargs):
         if not self.currency:
             try:
-                self.currency = Currencies.objects.get(code='USD'.upper())
-            except Currencies.DoesNotExist:
-                self.currency = Currencies.objects.create(
+                self.currency = Currency.objects.get(code='USD'.upper())
+            except Currency.DoesNotExist:
+                self.currency = Currency.objects.create(
                     name='US Dollar', code='USD'.upper(), symbol='$'
                 )
         

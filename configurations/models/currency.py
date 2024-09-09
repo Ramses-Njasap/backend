@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Currencies(models.Model):
+class Currency(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
     symbol = models.CharField(max_length=10, null=False, blank=False)
     code = models.CharField(max_length=3, unique=True, null=False, blank=False)

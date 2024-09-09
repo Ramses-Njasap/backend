@@ -7,3 +7,5 @@ from accounts.models.mlm_user import (MLMUser, MLMRelationship, MLMConfig,
 from accounts.models.account import *
 from accounts.models.devices import (DeviceLoginHistory, DeviceTokenBlacklist, DeviceToken,
                                      DeviceWallet, Device)
+
+from accounts.models.setting import *

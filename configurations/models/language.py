@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Languages(models.Model):
+class Language(models.Model):
     name = models.CharField(max_length=58, null=False, blank=False)
     code = models.CharField(max_length=10, null=False, blank=False)
     flag = models.TextField()
