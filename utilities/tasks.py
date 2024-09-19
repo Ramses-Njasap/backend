@@ -65,7 +65,7 @@ def send_sms_task(sub_id: str, message: str, phone: Union[str, List[str]]):
         'Content-Type': 'application/json'
         }
 
-        requests.request("POST", url, headers=headers, data=payload)
+        requests.request("POST", url, headers=headers, data=payload, timeout=60)
 
 
 @shared_task

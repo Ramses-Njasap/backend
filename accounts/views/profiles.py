@@ -75,7 +75,7 @@ class UserProfileView(APIView):
     def get(self, request):
         ip_address = request.META.get('REMOTE_ADDR')
         url = f'https://ipinfo.io/154.72.153.201/json'
-        response = requests.get(url)
+        response = requests.get(url, timeout=60)
         data = response.json()
 
         # ip_address = '8.8.8.8'  # Replace with the IP address you want to look up

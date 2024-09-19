@@ -51,7 +51,7 @@ class Nominatim:
 
     def _perform_request(self, url: str) -> Optional[Dict]:
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=60)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -95,7 +95,7 @@ class Nominatim:
                f"{zoom}/{x_tile}/{y_tile}@2x.pngraw?"
                f"access_token={settings.APPLICATION_SETTINGS['MAPBOX_API_KEY']}")
         
-        response = requests.get(url)
+        response = requests.get(url, timeout=60)
         if response.status_code != 200:
             raise Exception(f"Failed to retrieve elevation data: {response.status_code}")
 
