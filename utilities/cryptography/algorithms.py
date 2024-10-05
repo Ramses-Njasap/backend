@@ -1,4 +1,5 @@
-import random, uuid, base64
+import uuid, base64
+import secrets
 
 class AlphanumericCipher:
     def __init__(self):
@@ -8,7 +9,7 @@ class AlphanumericCipher:
     def generate_key(self):
         # Generating a random permutation of alphanumeric characters
         key = list(self.characters)
-        random.shuffle(key)
+        secrets.SystemRandom().shuffle(key)
         return dict(zip(self.characters, key))
 
     def encrypt(self, message):
