@@ -1,4 +1,4 @@
-import random, secrets, base64,time, hashlib
+import secrets, base64,time, hashlib
 
 from utilities.cryptography.algorithms import AlphanumericCipher
 
@@ -58,7 +58,7 @@ def generate_name():
     # Generate a random name by combining a random adjective and noun, with a random number at the end
     while True:
         noun = 'lalouge-user'
-        number = random.randint(100000, 999999)
+        number = secrets.SystemRandom().randint(100000, 999999)
         name = f'{noun}{number}'
         
         if len(name) <= 18:
