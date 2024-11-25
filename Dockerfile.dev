@@ -1,0 +1,46 @@
+# Use an official Python runtime as a parent image
+FROM python:3.10-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y \
+    gcc \
+    python3-dev \
+    libpq-dev \
+    apt-utils \
+    build-essential \
+    # Clean up apt cache to reduce image size
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up the working directory inside the container
+WORKDIR /usr/src/app
+
+# Install pipenv to manage virtual environments (optional)
+# RUN pip install pipenv
+
+# Create a virtual environment and activate it
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install pip and upgrade it
+RUN pip3 install --upgrade pip
+
+# Copy the requirements file
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip3 install -r requirements.txt
+
+# Copy the current directory contents into the container at /usr/src/app
+COPY . .
+
+# Expose port (adjust this as per your application’s needs)
+EXPOSE 8000
+
+# Command to run the application
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]

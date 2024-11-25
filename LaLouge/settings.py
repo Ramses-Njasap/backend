@@ -36,7 +36,7 @@ env.read_env(env_file)
 
 # Raises django's Improperly Configured exception if
 # SECRET_KEY not in os.environ
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY', None)
 
 
 # Checking If Project Is Running On LocalHost
@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'daphne',
     'anymail',
     'django_user_agents',
+    'rest_framework_gis',
 ]
 
 # Apps created using `django-admin startapp <app_name>` command
@@ -236,11 +237,11 @@ DEVICE_JWT = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'lalouge',
-        'USER': 'admin',
-        'PASSWORD': '2632',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': "lalouge",
+        'USER': "admin",
+        'PASSWORD': "2632",
+        'HOST': "localhost",
+        'PORT': "5432",
     }
 }
 
@@ -378,7 +379,7 @@ APPLICATION_SETTINGS = {
 }
 
 ANYMAIL = {
-    "SENDINBLUE_API_KEY": "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",
+    "SENDINBLUE_API_KEY": os.environ.get('SENDINBLUE_API_KEY', None),
     "SEND_DEFAULTS": {
         "tags": ["app"]
     },

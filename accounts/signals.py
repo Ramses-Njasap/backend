@@ -18,6 +18,7 @@ def create_profile_and_referral(sender, instance, created, **kwargs):
     """
     if created:
         UserSettings.objects.create(user=instance)
+
         UserProfile.objects.create(user=instance)
         real_estate_certifications_instance = RealEstateCertification.objects.create(user=instance)
         kyc_verification_check_instance = KYCVerificationCheck.objects.create(user=instance,

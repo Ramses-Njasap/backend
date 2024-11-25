@@ -4,7 +4,7 @@ from accounts.models.profiles import UserProfile
 from utilities import response
 
 
-class Profiles(models.Model):
+class Profile(models.Model):
 
     class UserType(models.TextChoices):
         COMPANY = 'COMPANY', _('Company')
@@ -36,7 +36,7 @@ class Profiles(models.Model):
         return f"{self.user.user.name}" if self.user and self.user.user else "Unknown User"
     
     def set_statuses(self, *statuses):
-        valid_statuses = [choice[0] for choice in Profiles.Status.choices]
+        valid_statuses = [choice[0] for choice in Profile.Status.choices]
         
         for status in statuses:
             if status not in valid_statuses:
@@ -56,14 +56,14 @@ class Profiles(models.Model):
     def save(self, *args, **kwargs):
         # Ensure statuses defaults to `BUYER` if profile has no status
         if not self.statuses:
-            self.statuses = [Profiles.Status.BUYER]
+            self.statuses = [Profile.Status.BUYER]
 
         # Check if profile is newly created by inspecting if the db table column has an id
         is_new = self.pk is None
 
         # Deactivate the profile if the class instance is newly created
         # and user is not a Buyer
-        if is_new and Profiles.Status.BUYER not in self.statuses:
+        if is_new and Profile.Status.BUYER not in self.statuses:
             self.is_active = False
         
         super().save(*args, **kwargs)

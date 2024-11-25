@@ -51,14 +51,14 @@ class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        # This manipulates the visible of `query_id` in requests.
-        # User `id` should not be visible no matter what the circumstance is
+        # This manipulates the visibility of `query_id` in requests.
+        # User `id` should not be visible no matter what the circumstances are
         # since it identifies an entire `Object` model instance so it can be used
-        # to manipulate an entire `Object` model instance by intruder without having sufficient information.
-        # `id` or `pk` values are easy to memorize and guessable so, in itself, it is not secure.
+        # to manipulate an entire `Object` model instance by intruder without having sufficient information .
+        # `id` or `pk` values are easy to memorize and guessable so, in itself, it is not secure .
         # `query_id` field are unique values through out `Object` models the same as `id or pk` values
-        # and difficult to memorize and guessable (since it's a long string/binary-string of characters), so, it serves as an acting
-        # `pk or id` at the level of the application (leaving aside the database which is another topic on its own).
+        # and difficult to memorize and guessable (since it's a long string/binary-string), so, it serves as an acting
+        # `pk or id` at the level of the application (leaving aside the database which is another topic on its own) .
         # Though difficult to memorize and guess and also it is difficult to use outside of the application to access values
         # on the database because as it leaves the database, the value becomes encrypted, it is still safe to only expose it
         # at times when it is severly needed. So, this at first level, helps to manipulate its visibility to external authorised applications.

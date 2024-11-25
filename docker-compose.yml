@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+   api:
+      build:
+         context: .
+         dockerfile: Dockerfile.dev
+      command: daphne LaLouge.asgi:application --port 8000 --bind 0.0.0.0 -v2
+      volumes:
+         - .:/usr/src/app  # Mounts the current directory (.) to /usr/src/app in the container
+      ports:
+         - 8000:8000  # Exposes port 8000 on the host and maps it to port 8000 in the container
+      env_file:
+         - .env  # Loads environment variables from the .env file into the container
+      restart: "on-failure"  # Restarts the container only if it fails
+      depends_on:
+         - postgres-db  # Ensures 'postgres-db' service starts before 'api' service
+      networks:
+         - lalouge-backend  # Connects 'api' service to the custom network 'lalouge-backend'
+
+   postgres-db:
+      image: kartoza/postgis:12.0
+      ports:
+         - 5433:5432
+      volumes:
+         - postgres_data:/var/lib/postgresql/data  # Mounts a volume to persist PostgreSQL data
+      environment:
+         - POSTGRES_USER=${POSTGRES_USER}
+         - POSTGRES_PASS=${POSTGRES_PASS}
+         - POSTGRES_DBNAME=${POSTGRES_DBNAME}
+      restart: "on-failure"
+      networks:
+         - lalouge-backend
+
+   # nginx:
+   #    restart: always
+   #    depends_on:
+   #       - api
+   #    build:
+   #       context: ./nginx
+   #       dockerfile: Dockerfile.dev
+   #    ports:
+   #       - 8080:80
+   #    networks:
+   #       - lalouge-backend
+
+   celeryworker:
+      build:
+         context: .
+         dockerfile: Dockerfile.dev
+      command: celery -A LaLouge worker --loglevel=info
+      volumes:
+         - .:/usr/src/app
+      env_file:
+         - .env
+      depends_on:
+         - api
+      networks:
+         - lalouge-backend
+
+   celerybeat:
+      build:
+         context: .
+         dockerfile: Dockerfile.dev
+      command: celery -A LaLouge beat --loglevel=info
+      volumes:
+         - .:/usr/src/app
+      env_file:
+         - .env
+      depends_on:
+         - api
+      networks:
+         - lalouge-backend
+
+networks:
+   lalouge-backend:
+      driver: bridge
+
+volumes:
+   postgres_data:

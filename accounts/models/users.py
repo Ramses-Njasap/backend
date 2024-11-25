@@ -98,7 +98,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_logout = models.DateTimeField(blank=True, null=True)
 
     query_id = models.BinaryField(null=False, blank=False, max_length=10000, db_index=True)
-    secret_key = models.BinaryField(null=False, blank=False, max_length=46)
+    secret_key = models.BinaryField(null=False, blank=False, max_length=46) # Used for generating unique One Time Passwords (OTP) for `users` .
 
     # Field to determine the visibility of query_id field in requests
     _pk_hidden = models.BooleanField(default=False)

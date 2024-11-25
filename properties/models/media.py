@@ -1,6 +1,6 @@
 from django.db import models
 
-from properties.models.properties import Properties
+from properties.models.homes import Homes
 
 
 class MediaType(models.Model):
@@ -34,8 +34,8 @@ class Media(models.Model):
         MKV = 'MKV', 'mkv'
         HEVC = 'HEVC', 'hevc'
 
-    property = models.ForeignKey(Properties, related_name='media', on_delete=models.CASCADE)
-    media = models.FileField(upload_to='media/properties/')
+    property = models.ForeignKey(Homes, related_name='media', on_delete=models.CASCADE)
+    media = models.FileField(upload_to='media/homes/')
     media_type = models.ForeignKey(MediaType, on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
