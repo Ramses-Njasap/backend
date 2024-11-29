@@ -4,11 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from accounts.models.users import User
 
-from accounts.managers.devices import DeviceManager
-
 from utilities.generators.device import DeviceSignature
-
-import uuid
 
 
 class DeviceTokenBlacklist(models.Model):
@@ -40,13 +36,15 @@ class DeviceToken(models.Model):
 
     def is_refresh_token_expired(self):
         return timezone.now() > self.refresh_token_expires_at
-    
+
     def is_access_token_expired(self):
         return timezone.now() > self.access_token_expires_at
-    
+
     def token_blacklist(self):
         if self.is_access_token_expired():
-            blacklisted_token_instance = DeviceTokenBlacklist.objects.create(access_token=self.access_token)
+            blacklisted_token_instance = DeviceTokenBlacklist.objects.create(
+                access_token=self.access_token)
+
             self.blacklisted_tokens.add(blacklisted_token_instance)
 
 
@@ -76,30 +74,37 @@ class Device(models.Model):
 
     _device_token = models.TextField(null=True, blank=True)
 
-    device_type = models.CharField(max_length=11, choices=DeviceType.choices, 
+    device_type = models.CharField(max_length=11, choices=DeviceType.choices,
                                    default=DeviceType.UNDEFINED)
-    
+
     client_type = models.CharField(max_length=150, default=",")
 
     operating_system = models.CharField(max_length=60, default=",")
 
-    device_signature = models.BinaryField(null=False, blank=False, max_length=10000)
+    device_signature = models.BinaryField(
+        null=False, blank=False, max_length=10000)
     is_synced = models.BooleanField(default=True)
 
     # This records the percentage trust the system has for this device
     _is_trusted = models.PositiveSmallIntegerField(default=0)
 
-    wallet = models.OneToOneField(DeviceWallet, null=True, blank=True, on_delete=models.SET_NULL)
+    wallet = models.OneToOneField(
+        DeviceWallet, null=True, blank=True,
+        on_delete=models.SET_NULL)
 
-    tokens = models.OneToOneField(DeviceToken, null=True, blank=True, on_delete=models.SET_NULL)
+    tokens = models.OneToOneField(
+        DeviceToken, null=True, blank=True,
+        on_delete=models.SET_NULL)
 
-    # `refresh_token_renewal_count` field is for the purpose of determinig Trust in a device.
-    # If a device has successfully renewed its refresh token 2 times with a max laps of 48 hours, that is: 
-    refresh_token_renewal_count = models.PositiveSmallIntegerField(default=0, null=True)
+    # `refresh_token_renewal_count` field is for
+    # the purpose of determinig Trust in a device.
+    # If a device has successfully renewed its
+    # refresh token 2 times with a max laps of 48 hours, that is:
+    refresh_token_renewal_count = models.PositiveSmallIntegerField(
+        default=0, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
 
     def sync_and_unsync_device(self):
 
@@ -112,7 +117,7 @@ class Device(models.Model):
                 self.wallet.save()
                 self.is_synced = False
                 self.save()
-        
+
         else:
             self.wallet.synced_amount += self.wallet.unsynced_amount
             self.wallet.amount_in_sync_transition = self.wallet.unsynced_amount

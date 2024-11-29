@@ -2,6 +2,7 @@ from configurations.utilities.currencies import ExchangeRates
 
 from celery import shared_task
 
+
 @shared_task
 def update_exchange_rates_cache():
     # Instantiate the ExchangeRates class

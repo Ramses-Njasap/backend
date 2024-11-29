@@ -1,15 +1,15 @@
 from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import (AbstractBaseUser, PermissionsMixin)
-from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
 
 # python imports
-import random, uuid, base64, binascii
-from urllib.parse import unquote
+import uuid
+import base64
 
 # custom imports
-from accounts.managers.users import (CreateUserManager, GetUserManager, VerifyUserManager)
+from accounts.managers.users import (CreateUserManager,
+                                     GetUserManager, VerifyUserManager)
 
 from utilities import response
 from utilities.generators.string_generators import (generate_name, QueryID, Keys)
@@ -34,7 +34,7 @@ class BannedEmail(models.Model):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    
+
     class UserType(models.TextChoices):
         BUYER = "BUYER", "buyer"
         INVESTOR = "INVESTOR", "investor"
@@ -42,7 +42,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         COMPANY = "COMPANY", 'company'
         EXTERNAL = 'EXTERNAL', 'external'
 
-    user_type = models.CharField(max_length=15, choices=UserType.choices, default=UserType.BUYER, db_index=True)
+    user_type = models.CharField(
+        max_length=15, choices=UserType.choices,
+        default=UserType.BUYER, db_index=True)
+
     username = models.CharField(max_length=19, unique=True, db_index=True)
     email = models.EmailField(blank=True, unique=True, null=True)
     phone = models.CharField(blank=True, unique=True, null=True, max_length=16)
@@ -58,7 +61,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=False)
 
     # Remove `is_verified` and add a model called Badge.
-    # `verification_badge` in `Badge` should be the replacement of `is_verified` here.
+    # `verification_badge` in `Badge`
+    # should be the replacement of `is_verified` here.
     is_verified = models.BooleanField(default=False)
 
     # multilevel marketing user checker
@@ -66,30 +70,39 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # external user checker.
     # external users are users who have been granted permission to use
-    # the API on their websites. These websites has to be registered and 
+    # the API on their websites. These websites has to be registered and
     # verified by our system before permission is granted
     is_external_user = models.BooleanField(default=False)
 
-    # Account visibility hides the account online status from other accounts irrespective 
+    # Account visibility hides the account online
+    # status from other accounts irrespective
     # of whether the account/user is online.
     is_account_visible = models.BooleanField(default=True)
 
-    # --> Account lock hides the online status of the account, prevent people from seeing the account 
-    # (in search or any client e.g postman, website, mobile app etc) thereby not being able to interact 
+    # --> Account lock hides the online status of the
+    # account, prevent people from seeing the account
+    # (in search or any client e.g postman, website, mobile app etc)
+    # thereby not being able to interact
     # with the locked account.
-    # --> Locked accounts cannot interact with other accounts, cannot perform any POST method, cannot send 
-    # messages but can view any resource with the right permission, complete monetary transactions etc
+    # --> Locked accounts cannot interact with other accounts,
+    # cannot perform any POST method, cannot send
+    # messages but can view any resource with the right permission,
+    # complete monetary transactions etc.
     is_account_locked = models.BooleanField(default=False)
 
     # Toggles the online status of the account/user
     is_online = models.BooleanField(default=False)
 
-    # Blocked accounts are not deleted accounts, they are not just accessible by anyone
-    # for the period of 6 months or if user carries out the neccessary requirements to unblock accounts
+    # Blocked accounts are not deleted accounts,
+    # they are not just accessible by anyone
+    # for the period of 6 months or if user carries out
+    # the neccessary requirements to unblock accounts
     is_account_blocked = models.BooleanField(default=False)
 
-    # Deleted accounts triggered by a user will be kept in the state of True for 28 days
-    # Should in case user wants to undo delete action otherwise the account will be deleted permanently
+    # Deleted accounts triggered by a user will be kept
+    # in the state of True for 28 days
+    # Should in case user wants to undo delete action
+    # otherwise the account will be deleted permanently
     is_account_deleted = models.BooleanField(default=False)
 
     datetime_joined = models.DateTimeField(auto_now_add=True)
@@ -97,8 +110,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_login = models.DateTimeField(blank=True, null=True)
     last_logout = models.DateTimeField(blank=True, null=True)
 
-    query_id = models.BinaryField(null=False, blank=False, max_length=10000, db_index=True)
-    secret_key = models.BinaryField(null=False, blank=False, max_length=46) # Used for generating unique One Time Passwords (OTP) for `users` .
+    query_id = models.BinaryField(
+        null=False, blank=False, max_length=10000, db_index=True)
+
+    # Used for generating unique One Time Passwords (OTP) for `users` .
+    secret_key = models.BinaryField(null=False, blank=False, max_length=46)
 
     # Field to determine the visibility of query_id field in requests
     _pk_hidden = models.BooleanField(default=False)
@@ -115,32 +131,35 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self) -> str:
 
         return str(self.username)
-    
+
     # @property
     # def get_username(self):
     #     return self.username.lstrip("@")
-    
+
     @classmethod
-    def create_superuser(cls, phone: str, password: str = None, **extra_fields) -> dict:
+    def create_superuser(cls, phone: str,
+                         password: str = None, **extra_fields) -> dict:
 
         manager = cls.objects
 
         return manager.create_superuser(phone, password, **extra_fields)
-    
+
     @classmethod
-    def create_admin(cls, phone: str, password: str = None, **extra_fields) -> dict:
+    def create_admin(cls, phone: str,
+                     password: str = None, **extra_fields) -> dict:
 
         manager = cls.objects
 
         return manager.create_admin(phone, password, **extra_fields)
-    
+
     @classmethod
-    def create_staff(cls, phone: str, password: str = None, **extra_fields) -> dict:
+    def create_staff(cls, phone: str,
+                     password: str = None, **extra_fields) -> dict:
 
         manager = cls.objects
 
         return manager.create_staff(phone, password, **extra_fields)
-    
+
     # Override the default manager
     @classmethod
     def create_user(cls, **kwargs) -> dict:
@@ -148,7 +167,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         manager = cls.objects
 
         return manager.create(**kwargs)
-    
+
     @classmethod
     def check_existence(cls, query_id: str) -> bool:
 
@@ -157,7 +176,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         query_id = base64.b64decode(query_id.encode())
 
         return manager.user_exists(query_id)
-    
+
     @classmethod
     def get_user(cls, query_id: str) -> dict:
 
@@ -174,38 +193,38 @@ class User(AbstractBaseUser, PermissionsMixin):
             )
 
         return manager.query_id(query_id)
-    
+
     @property
     def get_secret_key(self):
         key = Keys()
         return key.to_base64_string(self.secret_key)
-    
+
     @staticmethod
     def search(query: str) -> dict:
 
-        query_id_instance = QueryID()
-        query_id = query_id_instance.query_id(query_id=query_id)
+        # query_id_instance = QueryID()
+        # query_id = query_id_instance.query_id(query_id=query_id)
 
         return User.objects.filter(
-            Q(username__icontains=query) |
-            Q(phone__icontains=query)
+            Q(username__icontains=query)
+            | Q(phone__icontains=query)
         )
-    
+
     @property
-    def is_online(self):
+    def _is_online(self):
 
         if self.last_login and self.last_logout:
 
             return self.last_login >= self.last_logout
-        
+
         elif self.last_login:
 
             return True
-        
+
         elif self.last_logout:
 
             return False
-        
+
         else:
 
             return False
@@ -220,9 +239,11 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.username = f'@{username}'
 
             # Check if the username already exists
-            if User.objects.filter(username=self.username).exclude(pk=self.pk).exists():
+            if User.objects.filter(
+                    username=self.username).exclude(pk=self.pk).exists():
+
                 raise ValidationError({'error': 'Username already exists.'})
-            
+
         else:
 
             self.username = f'@{generate_name()}'
@@ -230,14 +251,14 @@ class User(AbstractBaseUser, PermissionsMixin):
             while User.objects.filter(username=self.username).exists():
                 self.username = f'@{generate_name()}'
 
-        # 
+        #
         # Building user_id_generator parameters
-        # 
+        #
 
         data = [self.user_type, self.username, self.phone, str(uuid.uuid5)]
         data_length = sum(len(item) for item in data)
 
-        # 
+        #
         # Stopped building user_id_generator parameters
         #
 
@@ -247,9 +268,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.query_id = query_id_instance.to_database()
 
         # Generating Secret Key
-        # Creating A New User Data List By Filtering `user_data` values that are not integers, strings, bytes or bool
-        filtered_user_data = [value for value in data if isinstance(value, (int, str, bytes, bool))]
-        
+        # Creating A New User Data List By Filtering
+        # `user_data` values that are not integers, strings, bytes or bool
+        filtered_user_data = [
+            value for value in data
+            if isinstance(value, (int, str, bytes, bool))
+        ]
+
         key_instance = Keys(filtered_user_data, _type="secret")
         self.secret_key = key_instance.generate()
 

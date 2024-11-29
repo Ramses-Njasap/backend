@@ -1,8 +1,12 @@
-import random, uuid, base64
+import random
+
 
 class AlphanumericCipher:
     def __init__(self):
-        self.characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        self.characters = (
+            "abcdefghijklmnopqrstuvwxyzABCDEFG"
+            "HIJKLMNOPQRSTUVWXYZ0123456789"
+        )
         self.key = self.generate_key()
 
     def generate_key(self):
@@ -19,5 +23,7 @@ class AlphanumericCipher:
     def decrypt(self, encrypted_message):
         # Decrypt the message using the inverse of the substitution cipher
         inverted_key = {v: k for k, v in self.key.items()}
-        decrypted_message = ''.join([inverted_key.get(char, char) for char in encrypted_message])
+        decrypted_message = ''.join(
+            [inverted_key.get(char, char) for char in encrypted_message]
+        )
         return decrypted_message

@@ -4,10 +4,13 @@ from accounts.models.mlm_user import MLMUser
 from accounts.models.profiles import UserProfile
 from accounts.models.plans import SubscriptionPlan, UserSubscriptionPlan
 
-from accounts.models.account import (OTP, PhoneNumberVerificationOTP, EmailVerificationOTP, LoginOTP,
-                                     UsedOTP, RealEstateCertification, KYCVerificationCheck, AccountVerification)
+from accounts.models.account import (OTP, PhoneNumberVerificationOTP,
+                                     EmailVerificationOTP, LoginOTP,
+                                     UsedOTP, RealEstateCertification,
+                                     KYCVerificationCheck, AccountVerification)
 
-from accounts.models.devices import (DeviceLoginHistory, DeviceTokenBlacklist, DeviceToken, DeviceWallet, Device)
+from accounts.models.devices import (DeviceLoginHistory, DeviceTokenBlacklist,
+                                     DeviceToken, DeviceWallet, Device)
 
 
 # Register your models here.

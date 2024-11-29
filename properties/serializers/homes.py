@@ -2,7 +2,7 @@ from rest_framework.serializers import ModelSerializer
 
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
-from properties.models.homes import Partition, RoomPartition, Room, Home
+from properties.models.homes import Partition, RoomPartition, Home
 from properties.models.amenities import Amenity
 
 from utilities import response
@@ -18,12 +18,12 @@ class PartitionSerializer(ModelSerializer):
         extra_kwargs = {
             'name': {'required': True},
         }
-    
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
         return representation
-    
+
     def create(self, validated_data):
         name = validated_data.get('name', None)
 
@@ -31,7 +31,7 @@ class PartitionSerializer(ModelSerializer):
 
             try:
                 partition_instance = Partition.objects.create(name=name)
-                
+
                 return partition_instance
             except Exception as e:
                 response.errors(
@@ -61,7 +61,7 @@ class RoomPartitionSerializer(ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         return representation
-    
+
     def create(self, validated_data):
 
         return super().create(validated_data)
@@ -75,10 +75,16 @@ class HomeSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Home
         geo_field = ("geom", "boundary")
-        fields = ("uploader", "name", "description", "availability", "built_on",
-                  "geom", "multi_rooms", "rooms", "distance_from_road", "boundary",
-                  "land_boundary", "general_amenities", "partial_upload", "query_id")
+
+        fields = (
+            "uploader", "name", "description", "availability",
+            "built_on", "geom", "multi_rooms", "rooms",
+            "distance_from_road", "boundary", "land_boundary",
+            "general_amenities", "partial_upload", "query_id"
+        )
+
         read_only_fields = ("query_id",)
+
         extra_kwargs = {
             "uploader": {"required": True},
             "name": {"required": True},
@@ -96,22 +102,23 @@ class HomeSerializer(GeoFeatureModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         return representation
-    
+
     def create(self, validated_data):
         uploader = validated_data.get("uploader", None)
         name = validated_data.get("name", None)
         description = validated_data.get("description", None)
         availability = validated_data.get("availability", None)
         built_on = validated_data.get("built_on", None)
-        geom = validated_data.get("geom", {})
+        # geom = validated_data.get("geom", {})
         multi_rooms = validated_data.get("multi_rooms", None)
         rooms = validated_data.get("rooms", [])
-        # example `rooms` = [{"home_type": "", "number_of_rooms": 5, "rooms_taken"}]
-        boundary = validated_data.get("boundary", [])
-        land_boundary = validated_data.get("land_boundary", {})
+        # example `rooms`
+        # = [{"home_type": "", "number_of_rooms": 5, "rooms_taken"}]
+        # boundary = validated_data.get("boundary", [])
+        # land_boundary = validated_data.get("land_boundary", {})
         general_amenities = validated_data.get("general_amenities", [])
 
-        if not None in (uploader, name):
+        if None not in (uploader, name):
             # Create a dictionary of fields to be used in the Home creation
             create_fields = {
                 'uploader': uploader,
@@ -123,14 +130,19 @@ class HomeSerializer(GeoFeatureModelSerializer):
             }
 
             # Remove any fields that have None or empty values
-            create_fields = {key: value for key, value in create_fields.items() if value}
+            create_fields = {
+                key: value
+                for key, value in create_fields.items() if value}
 
             try:
-                # Create the Home instance using only the fields that are present
+                # Create the Home instance using
+                # only the fields that are present
                 home_instance = Home.objects.create(**create_fields)
 
                 # Fetch the Amenity instances using the list of IDs
-                general_amenities_instances = Amenity.objects.filter(id__in=general_amenities)
+                general_amenities_instances = Amenity.objects.filter(
+                    id__in=general_amenities
+                )
 
                 home_instance.general_amenities.add(*general_amenities_instances)
 
@@ -148,13 +160,19 @@ class HomeSerializer(GeoFeatureModelSerializer):
                 )
 
             return home_instance
-        
-        else:
 
-            field_error = "Cannot Identify User and/or Home must have a name" if not uploader else "Home name is empty"
+        else:
+            if not uploader:
+                field_error = "Cannot Identify User and/or Home must have a name"
+            else:
+                field_error = "Home name is empty"
+
             response.errors(
                 field_error=field_error,
-                for_developer="Check if user is authenticated or check if `name` field has a value",
+                for_developer=(
+                    "Check if user is authenticated"
+                    " or check if `name` field has a value"
+                ),
                 code="BAD_REQUEST",
                 status_code=400
             )

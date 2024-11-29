@@ -12,14 +12,14 @@ class DeviceConsumer(AsyncWebsocketConsumer):
     def get_user_id(self, user_query_id):
         try:
             user_instance = User.get_user(query_id=user_query_id)
-        except:
+        except (User.DoesNotExist, Exception):
             return None
-        
+
         return user_instance.pk
 
     async def connect(self):
         user_query_id = self.scope['url_route']['kwargs']['user_query_id']
-        
+
         user_id = await self.get_user_id(user_query_id=user_query_id)
 
         # Use user_id as needed for your logic
@@ -37,7 +37,8 @@ class DeviceConsumer(AsyncWebsocketConsumer):
         user_id = await self.get_user_id(user_query_id=user_query_id)
 
         # Use user_id as needed for your logic
-        # Disconnect from the unique channel when the WebSocket is closed
+        # Disconnect from the unique channel when
+        # the WebSocket is closed
         await self.channel_layer.group_discard(
             f"user_{user_id}",
             self.channel_name

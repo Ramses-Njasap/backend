@@ -1,4 +1,5 @@
 from django.contrib.auth.models import (UserManager)
+from django.core.exceptions import ObjectDoesNotExist
 
 from utilities import response
 
@@ -11,20 +12,20 @@ from utilities import response
 
 
 class CreateUserManager(UserManager):
-    
+
     def _create_user(self, phone, password=None, **extra_fields):
         """
         Create and save a user with the given phone and password.
         """
         if not password:
             raise ValueError('You must provide a password')
-            
+
         if not phone:
             raise ValueError('You must provide a phone number')
-        
+
         # Check for unique constraint on phone
         if self.model.objects.filter(phone=phone).exists():
-            raise ValueError('A user with this phone already exists......')
+            raise ValueError('A user with this phone already exists.')
 
         # Create a new user object
         user = self.model(phone=phone, **extra_fields)
@@ -68,8 +69,9 @@ class CreateUserManager(UserManager):
         extra_fields['is_active'] = True
 
         # Call _create_user with the provided arguments
-        return self._create_user(phone=phone, password=password, **extra_fields)
-    
+        return self._create_user(phone=phone,
+                                 password=password, **extra_fields)
+
     def create_admin(self, phone, password=None, **extra_fields):
         """
         Create a staff member or an admin.
@@ -84,7 +86,8 @@ class CreateUserManager(UserManager):
         extra_fields['is_active'] = True
 
         # Call _create_user with the provided arguments
-        return self._create_user(phone=phone, password=password, **extra_fields)
+        return self._create_user(phone=phone,
+                                 password=password, **extra_fields)
 
     def create_superuser(self, phone, password=None, **extra_fields):
         """
@@ -101,10 +104,11 @@ class CreateUserManager(UserManager):
 
         # Call _create_user with the provided arguments
         return self._create_user(phone=phone, password=password, **extra_fields)
-    
+
     def create_externaluser(self, phone, password=None, **extra_fields):
         """
-        Create external users. External users are users who use the APIs on their own platform
+        Create external users. External users are users who
+        use the APIs on their own platform
         which is separate from our official platform
         """
 
@@ -128,7 +132,7 @@ class GetUserManager(UserManager):
         Retrieve user with phone
         """
         return self.get(phone=phone)
-    
+
     def query_id(self, query_id):
         try:
             return self.get(query_id=query_id)
@@ -138,7 +142,9 @@ class GetUserManager(UserManager):
             for_developer = f"{e}"
 
             # Raising error responses
-            response.errors(field_error=field_message, for_developer=for_developer, code="BAD_REQUEST", status_code=400)
+            response.errors(field_error=field_message,
+                            for_developer=for_developer,
+                            code="BAD_REQUEST", status_code=400)
 
 
 class VerifyUserManager(UserManager):
@@ -149,7 +155,7 @@ class VerifyUserManager(UserManager):
         """
         try:
             self.get(query_id=query_id)
-        except:
+        except ObjectDoesNotExist:
             return False
         return True
 
@@ -159,26 +165,26 @@ class VerifyUserManager(UserManager):
         """
         try:
             self.get(email=email)
-        except:
+        except ObjectDoesNotExist:
             return False
         return True
-    
+
     def phone_exists(self, phone: str) -> bool:
         """
         Checks If Phone Exists
         """
         try:
             self.get(phone=phone)
-        except:
+        except ObjectDoesNotExist:
             return False
         return True
-    
+
     def username_exists(self, username: str) -> bool:
         """
         Checks if username exists
         """
         try:
             self.get(username=username)
-        except:
+        except ObjectDoesNotExist:
             return False
         return True

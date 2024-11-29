@@ -1,19 +1,16 @@
+from django.contrib.auth import authenticate
+from django.db import models
+
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from accounts.models.users import User
 
 from utilities.serializers.fields import EmailOrPhoneSerializer
+from utilities import response
 
 import re
-from rest_framework import serializers, status
-from django.db import models
 
-
-from rest_framework import serializers
-from django.contrib.auth import authenticate
-
-from utilities.generators.tokens import UserAuthToken
-from utilities import response
 
 class LoginCredentialSerializer(serializers.Serializer):
     email_or_phone = EmailOrPhoneSerializer()
@@ -31,7 +28,8 @@ class LoginCredentialSerializer(serializers.Serializer):
 
         if user:
             # Use Django's built-in authentication to check the password
-            _is_auth = authenticate(request=self.context.get('request'), username=user.phone, password=password)
+            _is_auth = authenticate(request=self.context.get('request'),
+                                    username=user.phone, password=password)
             if _is_auth is None:
                 if not user.is_active:
                     response.errors(
@@ -43,7 +41,10 @@ class LoginCredentialSerializer(serializers.Serializer):
 
                 response.errors(
                     field_error="Login Failed. Check Password",
-                    for_developer=f"Login Failed. Invalid Password or Check `http requests` Parameters In {self.__class__.__name__}",
+                    for_developer=(f"""Login Failed."
+                                   " Invalid Password or Check
+                                   `http requests`"
+                                   " Parameters In {self.__class__.__name__}"""),
                     code="UNAUTHORIZED",
                     status_code=401
                 )
@@ -58,7 +59,7 @@ class LoginCredentialSerializer(serializers.Serializer):
         data['user'] = user
 
         return data
-    
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -71,7 +72,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if match:
             try:
                 user = User.objects.get(phone=phone)
-            except:
+            except User.DoesNotExist:
                 raise serializers.ValidationError("Phone number does not exist")
 
             if user and user.check_password(pin):
@@ -85,4 +86,5 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 return data
             raise serializers.ValidationError("Incorrect phone number or pin.")
         else:
-            raise serializers.ValidationError("Invalid phone number pattern. Add country code")
+            raise serializers.ValidationError(
+                "Invalid phone number pattern. Add country code")

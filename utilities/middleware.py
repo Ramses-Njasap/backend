@@ -1,9 +1,6 @@
 # middleware.py
-from typing import Any
 from django.http import (HttpRequest, JsonResponse)
 from django.urls import is_valid_path, get_urlconf
-
-from rest_framework import status
 
 from django_user_agents.utils import get_user_agent
 
@@ -14,7 +11,11 @@ class IsUserRobot:
     def __init__(self, get_response):
         self.get_response = get_response
 
-    def raise_error(self, code: str, status_code: int, field_error: str, for_developer: str):
+    def raise_error(
+            self, code: str, status_code: int,
+            field_error: str, for_developer: str
+    ):
+
         error = {
             "message": {
                 "request": code.replace("_", " "),
@@ -32,14 +33,20 @@ class IsUserRobot:
         try:
             user_agent = get_user_agent(request)
         except Exception as e:
-            return self.raise_error(code="INTERNAL_SERVER_ERROR", status_code=500,
-                                    field_error="Unable To Read Device Properties",
-                                    for_developer=str(e))
+            return self.raise_error(
+                code="INTERNAL_SERVER_ERROR",
+                status_code=500,
+                field_error="Unable To Read Device Properties",
+                for_developer=str(e)
+            )
 
         if not request.META.get('HTTP_USER_AGENT') or user_agent.is_bot:
-            return self.raise_error(code="LOCKED", status_code=423,
-                                    field_error="Bot Detected",
-                                    for_developer="Bot Detected")
+            return self.raise_error(
+                code="LOCKED",
+                status_code=423,
+                field_error="Bot Detected",
+                for_developer="Bot Detected"
+            )
         else:
             return self.get_response(request)
 
@@ -47,19 +54,23 @@ class IsUserRobot:
 class DeviceMetaInfoMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-    
-    def raise_error(code: str, status_code: int, field_error: str, for_developer: str):
+
+    def raise_error(
+            self, code: str, status_code: int,
+            field_error: str, for_developer: str
+    ):
+
         error = {
-                "message": {
-                    "request": code.replace("_", " "),
-                    "field": field_error,
-                },
-                "status": {
-                    "code": code,
-                    "status_code": status_code
-                },
-                "developer": for_developer
-            }
+            "message": {
+                "request": code.replace("_", " "),
+                "field": field_error,
+            },
+            "status": {
+                "code": code,
+                "status_code": status_code
+            },
+            "developer": for_developer
+        }
 
         return JsonResponse(error, status=404)
 
@@ -68,9 +79,12 @@ class DeviceMetaInfoMiddleware:
         try:
             user_agent = get_user_agent(request)
         except Exception as e:
-            self.raise_error(code="INTERNAL_SERVER_ERROR", status_code=500,
-                             field_error="Unable To Read Device Properties",
-                             for_developer=str(e))
+            self.raise_error(
+                code="INTERNAL_SERVER_ERROR",
+                status_code=500,
+                field_error="Unable To Read Device Properties",
+                for_developer=str(e)
+            )
 
         # Getting Device/Client Type
         if user_agent.is_mobile:
@@ -84,9 +98,12 @@ class DeviceMetaInfoMiddleware:
 
         # Getting Client Type
         if user_agent.browser:
-            client_type_info = f"{user_agent.browser.family}, {user_agent.browser.version_string}"
+            client_type_info = (
+                f"""{user_agent.browser.family},
+                {user_agent.browser.version_string}"""
+            )
         else:
-            client_type_info = f"LaLodge APP, 0.1"
+            client_type_info = "LaLodge APP, 0.1"
 
         meta_info = {
             # User Ip Address
@@ -96,7 +113,10 @@ class DeviceMetaInfoMiddleware:
             "device_type": device_type,
 
             # Device OS and OS Version
-            "os_osversion": f"{user_agent.os.family}, {user_agent.os.version_string}",
+            "os_osversion": (
+                f"""{user_agent.os.family},
+                {user_agent.os.version_string}"""
+            ),
 
             # Client Type and Client Version
             "client_clientversion": client_type_info,
@@ -115,22 +135,29 @@ class DeviceMetaInfoMiddleware:
 
 
 class CheckUnmatchedURLMiddleware:
+
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest):
         response = self.get_response(request)
 
-        # Check if the requested URL matches any defined URL patterns
-        if not is_valid_path(path=request.path_info.lstrip("/"), urlconf=get_urlconf()):
-            # If no URL pattern matches, return a JSON response with an error message
+        # Check if the requested URL matches any
+        # defined URL patterns
+        if not is_valid_path(
+            path=request.path_info.lstrip("/"),
+            urlconf=get_urlconf()
+        ):
+            # If no URL pattern matches, return a JSON
+            # response with an error message
+
             data = {'error': 'No matching URL pattern found.'}
             data['endpoint_status'] = 404
 
             # Include the original response data in the JSON response
             if response.status_code != 404:
                 return response
-            
+
             error = {
                 "message": {
                     "request": "NOT FOUND",
@@ -140,7 +167,10 @@ class CheckUnmatchedURLMiddleware:
                     "code": "NOT_FOUND",
                     "status_code": 404
                 },
-                "developer": f"{request.path_info.lstrip('/')} Does Not Match Any URLs"
+                "developer": (
+                    f"""{request.path_info.lstrip('/')}
+                     Does Not Match Any URLs"""
+                )
             }
 
             return JsonResponse(error, status=404)

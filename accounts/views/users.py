@@ -3,8 +3,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from django.core.paginator import Paginator
-
 # Import models from accounts models
 from accounts.models.users import User
 from accounts.models.devices import Device, DeviceLoginHistory
@@ -13,20 +11,19 @@ from accounts.models.account import PhoneNumberVerificationOTP, EmailVerificatio
 # Import serializers from accounts serializer
 from accounts.serializers.users import UserSerializer
 
-import requests, threading
-
 from utilities import response
 from utilities.account import Verification
 from utilities.generators.string_generators import QueryID
 from utilities.permissions import GrantPermission
 
-from utilities.generators.tokens import DeviceAuthenticator
-
 from rest_framework.pagination import PageNumberPagination
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+
 import time
+import requests
+import threading
 
 
 class CustomPageNumberPagination(PageNumberPagination):
@@ -42,7 +39,7 @@ class UserAPIView(APIView):
         if self.request.method == 'GET':
             return [GrantPermission()]
         return []
-            
+
     pagination_class = CustomPageNumberPagination
 
     def check_remember_me_instance(self, remember_me):
@@ -53,7 +50,7 @@ class UserAPIView(APIView):
                 code="BAD_REQUEST",
                 status_code=400
             )
-        
+
         return
 
     # Handle HTTP Post method
@@ -63,7 +60,8 @@ class UserAPIView(APIView):
 
         self.check_remember_me_instance(remember_me=remember_me)
 
-        # Create user serializer instance using request data and parsing request
+        # Create user serializer instance using
+        # request data and parsing request
         # to serializer class for extra functionality on request
         serializer = UserSerializer(data=request.data, context={'request': request})
 
@@ -78,20 +76,30 @@ class UserAPIView(APIView):
 
             # Perform geolocation lookup asynchronously
             user_ip = request.device_meta_info["ip"]
-            
+
             # Perform geolocation lookup in a separate thread
-            geolocation_thread = threading.Thread(target=self.get_geolocation, args=(request.device_meta_info, user_ip, self.handle_geolocation, user_instance))
+            geolocation_thread = threading.Thread(
+                target=self.get_geolocation,
+                args=(request.device_meta_info, user_ip,
+                      self.handle_geolocation, user_instance))
+
             geolocation_thread.start()
-            
+
             # Determining the verification type
-            verification_type = ["email", EmailVerificationOTP] if user_instance.email else ["phone", PhoneNumberVerificationOTP]
+            if user_instance.email:
+                verification_type = ["email", EmailVerificationOTP]
+            else:
+                verification_type = ["phone", PhoneNumberVerificationOTP]
 
             # Creating a thread for the appropriate verification method
             send_verification_thread = threading.Thread(
-                target=getattr(Verification(user=user_instance, model=verification_type[1]), verification_type[0])
+                target=getattr(
+                    Verification(user=user_instance, model=verification_type[1]),
+                    verification_type[0])
             )
+
             send_verification_thread.start()
-            
+
             # Create the response data
 
             data = {}
@@ -104,7 +112,7 @@ class UserAPIView(APIView):
             data["user"]["storage"]["session"] = not remember_me
 
             return Response(data, status=status.HTTP_201_CREATED)
-        
+
         # serializer_errors = response.serializer_errors(serializer.errors)
 
         # If the data is not valid, return validation errors
@@ -116,8 +124,10 @@ class UserAPIView(APIView):
             url = f"https://ipinfo.io/{user_ip}/json/"
             res = requests.get(url)
             geolocation_data = res.json()
-            callback(device_meta_info=device_meta_info, geolocation_data=geolocation_data, user_ip=user_ip, user_instance=user_instance)
-        
+            callback(device_meta_info=device_meta_info,
+                     geolocation_data=geolocation_data, user_ip=user_ip,
+                     user_instance=user_instance)
+
         # This Error Response Should Use Websocket (Real Time)
         except requests.RequestException as e:
             response.errors(
@@ -128,7 +138,7 @@ class UserAPIView(APIView):
                 main_thread=False,
                 param=user_instance.pk
             )
-        
+
         except Exception as e:
             response.errors(
                 field_error="Failure To Get Device GeoLocation Data",
@@ -139,12 +149,18 @@ class UserAPIView(APIView):
                 param=user_instance.pk
             )
 
-    def handle_geolocation(self, device_meta_info, geolocation_data, user_ip, user_instance):
+    def handle_geolocation(self, device_meta_info, geolocation_data,
+                           user_ip, user_instance):
         # Handle the geolocation data, save it to the database, etc.
         try:
-            device_instance = Device.objects.create(user=user_instance, user_agent=str(device_meta_info["user_agent"]), 
-                                                    device_type=device_meta_info["device_type"], client_type=device_meta_info["client_clientversion"], 
-                                                    operating_system=device_meta_info["os_osversion"], _is_trusted=100)
+            device_instance = Device.objects.create(
+                user=user_instance,
+                user_agent=str(device_meta_info["user_agent"]),
+                device_type=device_meta_info["device_type"],
+                client_type=device_meta_info["client_clientversion"],
+                operating_system=device_meta_info["os_osversion"],
+                _is_trusted=100)
+
         except Exception as e:
             response.errors(
                 field_error="Failure To Record Device",
@@ -154,10 +170,12 @@ class UserAPIView(APIView):
                 main_thread=False,
                 param=user_instance.pk
             )
-        
+
         try:
-            device_login_history_instance = DeviceLoginHistory.objects.create(
-                device=device_instance, ip_address=user_ip, physical_address=geolocation_data)
+            DeviceLoginHistory.objects.create(
+                device=device_instance, ip_address=user_ip,
+                physical_address=geolocation_data)
+
         except Exception as e:
             response.errors(
                 field_error="Failure To Record Login History.",
@@ -175,9 +193,11 @@ class UserAPIView(APIView):
             "query_id": QueryID().get_query_id(user_instance.query_id)
         }
 
-        user_device_instance = Device.objects.filter(user__query_id=user_instance.query_id).last()
+        user_device_instance = Device.objects.filter(
+            user__query_id=user_instance.query_id).last()
 
-        # If User Device Was Created Successfully, Extract The Device's Token Data
+        # If User Device Was Created Successfully,
+        # Extract The Device's Token Data
         if user_device_instance:
             tokens = user_device_instance.tokens
             access = {
@@ -188,7 +208,7 @@ class UserAPIView(APIView):
                 "token": tokens.refresh_token,
                 "exp": tokens.refresh_token_expires_at.isoformat()
             }
-        
+
         else:
             response.errors(
                 field_error="Failure To Register Device",

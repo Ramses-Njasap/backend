@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import Text, Scrollbar, Entry, Label, messagebox, ttk
 import subprocess
-import pexpect
 
 from commands import CommandsFrame
 from databases import DatabasesFrame
+
 
 class AdminApp:
     def __init__(self, root):
@@ -19,10 +19,16 @@ class AdminApp:
         nav_frame = tk.Frame(root, bg='#333')
         nav_frame.pack(side='left', fill='y')
 
-        btn_commands = ttk.Button(nav_frame, text='Commands', command=self.show_commands)
+        btn_commands = ttk.Button(
+            nav_frame, text='Commands',
+            command=self.show_commands
+        )
         btn_commands.pack(pady=10, padx=20, fill='x', side='top')
 
-        btn_databases = ttk.Button(nav_frame, text='Databases', command=self.show_databases)
+        btn_databases = ttk.Button(
+            nav_frame, text='Databases',
+            command=self.show_databases
+        )
         btn_databases.pack(pady=10, padx=20, fill='x', side='top')
 
         # Create a frame to hold the buttons and entry widgets
@@ -30,8 +36,12 @@ class AdminApp:
         self.frame.pack(side='left', fill='both', expand=True)
 
         # Output space to the right
-        self.output_text = Text(root, wrap='word', height=20, width=80, bg='#ffffff')
-        self.output_text.pack(side='right', pady=10, padx=10, fill='both', expand=True)
+        self.output_text = Text(
+            root, wrap='word', height=20, width=80, bg='#ffffff'
+        )
+        self.output_text.pack(
+            side='right', pady=10, padx=10, fill='both', expand=True
+        )
 
         scrollbar = Scrollbar(root, command=self.output_text.yview)
         scrollbar.pack(side='right', fill='y')
@@ -49,9 +59,11 @@ class AdminApp:
             self.databases_frame.destroy()
 
         # Create a new CommandsFrame instance
-        self.commands_frame = CommandsFrame(self.frame, self.output_text, self.root)
+        self.commands_frame = CommandsFrame(
+            self.frame, self.output_text, self.root
+        )
         self.commands_frame.pack(fill='both', expand=True)
-    
+
     def show_createsuperuser_prompt(self):
         # Display prompts for createsuperuser parameters
         prompts = ['Username', 'Email', 'Password', 'Password (again)']
@@ -66,13 +78,20 @@ class AdminApp:
             entries[prompt] = entry
 
         # Execute createsuperuser command when the button is clicked
-        btn_create_superuser = ttk.Button(self.root, text='Create Superuser', command=lambda: self.execute_createsuperuser(entries))
+        btn_create_superuser = ttk.Button(
+            self.root, text='Create Superuser',
+            command=lambda: self.execute_createsuperuser(entries)
+        )
         btn_create_superuser.pack(pady=10)
-    
+
     def execute_createsuperuser(self, entries):
         try:
             # Run the createsuperuser command with the provided parameters
-            process = subprocess.Popen(['python', 'manage.py', 'createsuperuser'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            process = subprocess.Popen(
+                ['python', 'manage.py', 'createsuperuser'],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, text=True
+            )
 
             for prompt, entry in entries.items():
                 user_input = entry.get()
@@ -91,12 +110,18 @@ class AdminApp:
                     self.root.update_idletasks()
 
             if process.returncode == 0:
-                messagebox.showinfo('Success', 'Superuser created successfully.')
+                messagebox.showinfo(
+                    'Success', 'Superuser created successfully.'
+                )
             else:
-                messagebox.showerror('Error', 'Error executing createsuperuser.')
+                messagebox.showerror(
+                    'Error', 'Error executing createsuperuser.'
+                )
 
         except Exception as e:
-            messagebox.showerror('Error', f'An unexpected error occurred:\n\n{e}')
+            messagebox.showerror(
+                'Error', f'An unexpected error occurred:\n\n{e}'
+            )
 
     def show_databases(self):
         # Destroy the current frames if they exist
@@ -116,7 +141,11 @@ class AdminApp:
             separator = f"\n{'*' * 20} {command} Output {'*' * 20}\n\n"
             self.output_text.insert('end', separator)
             # Run the selected management command
-            process = subprocess.Popen(['python', 'manage.py', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            process = subprocess.Popen(
+                ['python', 'manage.py', command],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True
+            )
 
             while True:
                 output = process.stdout.readline()
@@ -128,8 +157,14 @@ class AdminApp:
                     self.root.update_idletasks()
 
             if process.returncode == 0:
-                messagebox.showinfo('Success', f'{command} executed successfully.')
+                messagebox.showinfo(
+                    'Success', f'{command} executed successfully.'
+                )
             else:
-                messagebox.showerror('Error', f'Error executing {command}.')
+                messagebox.showerror(
+                    'Error', f'Error executing {command}.'
+                )
         except Exception as e:
-            messagebox.showerror('Error', f'An unexpected error occurred:\n\n{e}')
+            messagebox.showerror(
+                'Error', f'An unexpected error occurred:\n\n{e}'
+            )

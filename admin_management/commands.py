@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import messagebox, Text, Scrollbar, ttk
 import subprocess
-import sys
+
 
 class CommandsFrame(tk.Frame):
     def __init__(self, parent, output_text, root):
@@ -13,8 +13,12 @@ class CommandsFrame(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        self.output_text = Text(self, wrap='word', height=20, width=80, bg='#ffffff')
-        self.output_text.pack(side='right', pady=10, padx=10, fill='both', expand=True)
+        self.output_text = Text(
+            self, wrap='word', height=20, width=80, bg='#ffffff'
+        )
+        self.output_text.pack(
+            side='right', pady=10, padx=10, fill='both', expand=True
+        )
 
         scrollbar = Scrollbar(self, command=self.output_text.yview)
         scrollbar.pack(side='right', fill='y')
@@ -29,7 +33,10 @@ class CommandsFrame(tk.Frame):
         }
 
         for command_name, management_command in commands.items():
-            btn = ttk.Button(self, text=command_name, command=lambda cmd=management_command: self.run_management_command(cmd))
+            btn = ttk.Button(
+                self, text=command_name,
+                command=lambda cmd=management_command: self.run_management_command(cmd)
+            )
             btn.pack(pady=10, padx=20, fill='x')
 
         phone_label = tk.Label(self, text='Phone:')
@@ -46,7 +53,11 @@ class CommandsFrame(tk.Frame):
         try:
             separator = f"\n{'*' * 20} {command} Output {'*' * 20}\n\n"
             self.output_text.insert('end', separator)
-            process = subprocess.Popen(['python', 'manage.py', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            process = subprocess.Popen(
+                ['python', 'manage.py', command],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True
+            )
 
             while True:
                 output = process.stdout.readline()
@@ -58,8 +69,14 @@ class CommandsFrame(tk.Frame):
                     self.parent.update_idletasks()
 
             if process.returncode == 0:
-                messagebox.showinfo('Success', f'{command} executed successfully.')
+                messagebox.showinfo(
+                    'Success', f'{command} executed successfully.'
+                )
             else:
-                messagebox.showerror('Error', f'Error executing {command}.')
+                messagebox.showerror(
+                    'Error', f'Error executing {command}.'
+                )
         except Exception as e:
-            messagebox.showerror('Error', f'An unexpected error occurred:\n\n{e}')
+            messagebox.showerror(
+                'Error', f'An unexpected error occurred:\n\n{e}'
+            )

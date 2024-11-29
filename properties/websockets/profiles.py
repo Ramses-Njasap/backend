@@ -6,6 +6,7 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
+
 class CreateProfile(AsyncWebsocketConsumer):
 
     @sync_to_async
@@ -15,7 +16,7 @@ class CreateProfile(AsyncWebsocketConsumer):
         except User.DoesNotExist:
             return None
         return user_instance.pk
-    
+
     @sync_to_async
     def get_user_profile_instance(self, user_query_id) -> models.Model:
         try:
@@ -23,7 +24,7 @@ class CreateProfile(AsyncWebsocketConsumer):
         except UserProfile.DoesNotExist:
             return None
         return user_profile_instance
-    
+
     @sync_to_async
     def create_profile(self, user_query_id, profile_data):
         user_instance = User.objects.get(pk=user_query_id)
@@ -62,8 +63,10 @@ class CreateProfile(AsyncWebsocketConsumer):
         profile_data_json = json.loads(profile_data)
         user_query_id = self.scope['url_route']['kwargs']['user_query_id']
 
-        user_profile = await self.get_user_profile_instance(user_query_id, profile_data_json)
-        
+        user_profile = await self.get_user_profile_instance(
+            user_query_id, profile_data_json
+        )
+
         if user_profile:
             await self.create_profile(user_query_id)
             await self.send(text_data=json.dumps({

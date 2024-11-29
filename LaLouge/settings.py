@@ -14,9 +14,9 @@ from pathlib import Path
 
 from datetime import timedelta
 
-import os, environ, socket
-
-from django.utils import timezone
+import os
+import environ
+import socket
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,7 +42,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', None)
 # Checking If Project Is Running On LocalHost
 def is_localhost(ip_address):
     try:
-        localhost_ips = [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if ':' not in ip]
+        host_ips = socket.gethostbyname_ex(socket.gethostname())[2]
+        localhost_ips = [ip for ip in host_ips if ':' not in ip]
         return ip_address in localhost_ips
     except socket.gaierror:
         return False
@@ -251,7 +252,10 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'UserAttributeSimilarityValidator'
+        ),
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
@@ -315,7 +319,8 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT')
 # Use TLS encryption for security
 EMAIL_USE_TLS = True
 
-# Replace with your Gmail email address and password or app password if you have 2-step verification enabled
+# Replace with your Gmail email address and password or app password
+# if you have 2-step verification enabled
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
@@ -333,7 +338,7 @@ SMS_USER = os.environ.get("SMS_USER")
 SMS_PASSWORD = os.environ.get("SMS_PASSWORD")
 
 # EXHANGE RATE API SETTING\
-EXCHANGE_RATE_API=os.environ.get("EXCHANGE_RATE_API", None)
+EXCHANGE_RATE_API = os.environ.get("EXCHANGE_RATE_API", None)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -350,7 +355,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APPLICATION_SETTINGS = {
     "CMD_SECRET_KEY": os.environ.get('CMD_SECRET_KEY', None),
 
-    # `INACTIVITY_LIMIT` Sets The Default Limit For Inactivity Such As Account Inactivity,
+    # `INACTIVITY_LIMIT` Sets The Default Limit For Inactivity
+    # Such As Account Inactivity,
     # Or Any Inactivity Recorded.
     "INACTIVITY_LIMIT": timedelta(days=28),
 
@@ -379,19 +385,30 @@ APPLICATION_SETTINGS = {
 }
 
 ANYMAIL = {
-    "SENDINBLUE_API_KEY": os.environ.get('SENDINBLUE_API_KEY', None),
+    "BREVO_API_KEY": os.environ.get('BREVO_API_KEY', None),
     "SEND_DEFAULTS": {
         "tags": ["app"]
     },
     "DEBUG_API_REQUESTS": DEBUG,
 }
 
-from celery.schedules import crontab
+BREVO_SETTINGS = {
+    "BREVO_API_KEY": os.environ.get('BREVO_API_KEY', None),
+    "SENDER_EMAIL": {
+        "NO_REPLY": {
+            "email": "noreply@gmail.com",
+            "name": "No Reply"
+        }
+    }
+}
+
 
 CELERY_BEAT_SCHEDULE = {
     "delete_unverified_accounts": {
         "task": "utilities.tasks.clean_up_unverified_accounts",
-        "schedule": 1209600, # Exactly 14 days in seconds (3600s = 1hour, 3600s * 24hours = 1day, 14days = 1209600seconds)
+        # Exactly 14 days in seconds
+        # (3600s = 1hour, 3600s * 24hours = 1day, 14days = 1209600seconds)
+        "schedule": 1209600,
     },
     "fetch_currency_exchange_rates": {
         "task": "configurations.tasks.update_exchange_rates_cache",

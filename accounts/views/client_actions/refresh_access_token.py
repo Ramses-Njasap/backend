@@ -17,9 +17,10 @@ class RefreshAccessToken(APIView):
 
         # Initializing `DeviceAuthenticator`
 
-        device_auth_token =  DeviceAuthenticator()
+        device_auth_token = DeviceAuthenticator()
 
-        access, refresh = device_auth_token.refresh_access_token(refresh_token=refresh_token, renew=renew)
+        access, refresh = device_auth_token.refresh_access_token(
+            refresh_token=refresh_token, renew=renew)
 
         tokens_data = {
             "access": {

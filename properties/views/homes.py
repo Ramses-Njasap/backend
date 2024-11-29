@@ -24,7 +24,7 @@ class HomeView(APIView):
                     code="NOT_FOUND",
                     status_code=404,
                 )
-            
+
             except Exception as e:
                 response.errors(
                     field_error="Failed To Get Users Data",
@@ -32,21 +32,25 @@ class HomeView(APIView):
                     code="SERVER_ERROR",
                     status_code=500
                 )
-            
+
             if user_instance:
                 try:
-                    user_profile_instance = UserProfile.objects.get(user=user_instance)
+                    user_profile_instance = UserProfile.objects.get(
+                        user=user_instance
+                    )
 
-                    profile_instance = Profile.objects.get(user=user_profile_instance)
+                    profile_instance = Profile.objects.get(
+                        user=user_profile_instance
+                    )
 
                 except UserProfile.DoesNotExist:
                     response.errors(
                         field_error="User Not Found",
-                        for_developer=f"{str(e)}",
+                        for_developer="User Not Found",
                         code="NOT_FOUND",
                         status_code=404
                     )
-                
+
                 except Exception as e:
                     response.errors(
                         field_error="Failed To Get Users Data",
@@ -54,19 +58,19 @@ class HomeView(APIView):
                         code="SERVER_ERROR",
                         status_code=500
                     )
-                
+
                 return profile_instance
-        
+
         else:
 
             return Profile.objects.all()
-    
+
     def post(self, request):
 
-        boundary = request.data.pop("boundary", [])
-        land_boundary = request.data.pop("land_boundary", {})
-        general_amenities = request.data.pop("general_amenities", {})
-        rooms = request.data.get("rooms", [])
+        # boundary = request.data.pop("boundary", [])
+        # land_boundary = request.data.pop("land_boundary", {})
+        # general_amenities = request.data.pop("general_amenities", {})
+        # rooms = request.data.get("rooms", [])
 
         # Access query parameters
         query_params = request.query_params
@@ -86,18 +90,22 @@ class HomeView(APIView):
         else:
             uploader = self.get_user_profile_instance(query_id=query_id)
             request.data["uploader"] = uploader
-        
-        # Create home serializer instance using request data and parsing request
-        # to serializer class for extra functionality on request
-        serializer = HomeSerializer(data=request.data, context={'request': request})
+
+        # Create home serializer instance using
+        # request data and parsing request
+        # to serializer class for extra functionality on request.
+        serializer = HomeSerializer(
+            data=request.data, context={'request': request}
+        )
 
         if serializer.is_valid():
             home_instance = serializer.save()
 
             # Perform geolocation lookup in a separate thread
-            geolocation_thread = threading.Thread(target=self.get_geolocation, args=(home_instance))
+            geolocation_thread = threading.Thread(
+                target=self.get_geolocation, args=(home_instance)
+            )
             geolocation_thread.start()
 
-    
     def thread2(self, home_instance):
         ...

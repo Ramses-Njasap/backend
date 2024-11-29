@@ -3,6 +3,9 @@
 import os
 import sys
 
+# Import the patch
+from LaLouge import monkeypatch  # noqa: F401
+
 
 def main():
     """Run administrative tasks."""

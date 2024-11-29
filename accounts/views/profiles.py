@@ -18,6 +18,7 @@ User Profiles are created automatically when user creates an account
 so, no POST method in any of these classes.
 """
 
+
 class UserProfileView(APIView):
     # permission_classes = (AuthPermission,)
     parser_classes = [JSONParser]
@@ -38,7 +39,7 @@ class UserProfileView(APIView):
                     code="NOT_FOUND",
                     status_code=404,
                 )
-            
+
             except Exception as e:
                 response.errors(
                     field_error="Failed To Get Users Data",
@@ -46,18 +47,18 @@ class UserProfileView(APIView):
                     code="SERVER_ERROR",
                     status_code=500
                 )
-            
+
             if user_instance:
                 try:
                     user_profile_instance = UserProfile.objects.get(user=user_instance)
                 except UserProfile.DoesNotExist:
                     response.errors(
                         field_error="User Not Found",
-                        for_developer=f"{str(e)}",
+                        for_developer="User Not Found",
                         code="NOT_FOUND",
                         status_code=404
                     )
-                
+
                 except Exception as e:
                     response.errors(
                         field_error="Failed To Get Users Data",
@@ -65,26 +66,29 @@ class UserProfileView(APIView):
                         code="SERVER_ERROR",
                         status_code=500
                     )
-                
+
                 return user_profile_instance
-        
+
         else:
 
             return UserProfile.objects.all()
 
     def get(self, request):
-        ip_address = request.META.get('REMOTE_ADDR')
-        url = f'https://ipinfo.io/154.72.153.201/json'
+        # ip_address = request.META.get('REMOTE_ADDR')
+        url = "https://ipinfo.io/154.72.153.201/json"
         response = requests.get(url)
         data = response.json()
 
-        # ip_address = '8.8.8.8'  # Replace with the IP address you want to look up
+        # ip_address = '8.8.8.8'
+        # Replace with the IP address you want to look up
         ip_info = data
 
         print(f"IP Address: {ip_info.get('ip')}")
-        print(f"Location: {ip_info.get('city')}, {ip_info.get('region')}, {ip_info.get('country')}")
+        print(f"""Location: {ip_info.get('city')}, {ip_info.get('region')},
+              {ip_info.get('country')}""")
         print(f"Latitude/Longitude: {ip_info.get('loc')}")
-        print(f"Device Type: Not available (IP addresses do not inherently provide device type information)")
+        print("Device Type: Not available (IP addresses do not"
+              " inherently provide device type information)")
         # Access query parameters
         query_params = request.query_params
 
@@ -92,9 +96,16 @@ class UserProfileView(APIView):
         query_id = query_params.get("query-id", None)
 
         # user_profiles = self.get_user_profiles(query_id)
-        
-        return Response(UserProfileSerializer(self.get_user_profiles(query_id=query_id)).data) if query_id else Response(UserProfileSerializer(self.get_user_profiles(), many=True).data)
 
+        if query_id:
+            return Response(
+                self.get_user_profiles(query_id=query_id).data
+            )
+
+        else:
+            Response(
+                UserProfileSerializer(
+                    self.get_user_profiles(), many=True).data)
 
 
 class UserProfileDetailView(APIView):
@@ -104,13 +115,15 @@ class UserProfileDetailView(APIView):
     Retrieve, update (PUT or PATCH), or delete a user profile instance.
     """
     def get_object(self, query_id):
-        # Returning User Profile Object Whose User Object Attribute `is_active` Is True
+        # Returning User Profile Object Whose User
+        # Object Attribute `is_active` Is True
         # Else, An Error Will Be Thrown
         return UserProfile.get_profile(query_id)
 
     def get(self, request, query_id):
 
-        # Getting Profile Instance Whose User Model Object Matches The Query_ID
+        # Getting Profile Instance Whose
+        # User Model Object Matches The Query_ID
         profile_instance = self.get_object(query_id)
 
         # Serializing User Profile Instance Upon Successful Retrieval
@@ -133,7 +146,8 @@ class UserProfileDetailView(APIView):
         profile_instance = self.get_object(query_id)
 
         # Use partial=True for partial updates
-        serializer = UserProfileSerializer(profile_instance, data=request.data, partial=True)
+        serializer = UserProfileSerializer(
+            profile_instance, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()

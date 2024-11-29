@@ -1,46 +1,56 @@
 # your_app/tasks.py
-from accounts.models.users import User
-from accounts.models.account import PhoneNumberVerificationOTP, EmailVerificationOTP
-
 from celery import shared_task
 
-from django.core.mail import send_mail
 from django.core.management import call_command
-from django.utils import timezone
 from django.conf import settings
-
-from utilities import response
 
 from typing import Union, List
 
-import json, requests
-from django.core.mail import EmailMessage
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
+
+from utilities import response
+
+import json
+import requests
 
 
 @shared_task
-def send_email_task(template_id: int, user_pk: int, otp_code: int, recipient_list: Union[str, list[str]]):
+def send_email_task(
+    html_content: str, user_pk: int,
+    recipient_list: Union[str, list[str]],
+    sender: dict[str, str], subject: str
+):
 
-    recipient_lists = [recipient_list] if isinstance(recipient_list, str) else recipient_list
+    # Configure API key authorization
+    configuration = sib_api_v3_sdk.Configuration()
+    configuration.api_key['api-key'] = settings.BREVO_SETTINGS['BREVO_API_KEY']
 
-    for recipient_list in recipient_lists:
+    # Create an instance of the Email API
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+        sib_api_v3_sdk.ApiClient(configuration)
+    )
 
-        message = EmailMessage(to=[recipient_list])
-        message.template_id = template_id
-        message.from_email = None
-        message.merge_global_data = {
-            "otp": otp_code,
-        }
-        try:
-            message.send()
-        except Exception as e:
-            response.errors(
-                field_error="Failure To Send Verification Email",
-                for_developer=str(e),
-                code="SERVER_ERROR",
-                status_code=1011,
-                main_thread=False,
-                param=user_pk
-            )
+    # Create the email data
+    email = sib_api_v3_sdk.SendSmtpEmail(
+        to=recipient_list,  # Specify recipients
+        sender=sender,  # Specify sender
+        subject=subject,  # Email subject
+        html_content=html_content,  # Rendered HTML template
+    )
+
+    try:
+        # Send the email
+        api_instance.send_transac_email(email)
+    except ApiException as e:
+        response.errors(
+            field_error="Failure To Send Verification Email",
+            for_developer=str(e),
+            code="SERVER_ERROR",
+            status_code=1011,
+            main_thread=False,
+            param=user_pk
+        )
 
 
 @shared_task
@@ -48,7 +58,8 @@ def send_sms_task(sub_id: str, message: str, phone: Union[str, List[str]]):
 
     url = "https://smsvas.com/bulk/public/index.php/api/v1/sendsms/"
 
-    # Converting Phone To A List String Of Single Element If Phone Is A String
+    # Converting Phone To A List String Of Single
+    # Element If Phone Is A String
 
     phone_numbers = [phone] if isinstance(phone, str) else phone
 
@@ -62,7 +73,7 @@ def send_sms_task(sub_id: str, message: str, phone: Union[str, List[str]]):
             "mobiles": str(single_phone).replace("+", "")
         })
         headers = {
-        'Content-Type': 'application/json'
+            'Content-Type': 'application/json'
         }
 
         requests.request("POST", url, headers=headers, data=payload)
@@ -71,6 +82,11 @@ def send_sms_task(sub_id: str, message: str, phone: Union[str, List[str]]):
 @shared_task
 def clean_up_unverified_accounts():
 
-    # Calling The Cleanup_unverified_accounts Management Command And Parsing The CMD_SECRET_KEY (Password) To It
+    # Calling The Cleanup_unverified_accounts Management
+    # Command And Parsing The CMD_SECRET_KEY (Password) To It
     # Found IN accounts.management.commands.cleanup_unverified_accounts.py
-    call_command('cleanup_unverified_accounts', '--secret-key', settings.APPLICATION_SETTINGS['CMD_SECRET_KEY'])
+    call_command(
+        'cleanup_unverified_accounts',
+        '--secret-key',
+        settings.APPLICATION_SETTINGS['CMD_SECRET_KEY']
+    )

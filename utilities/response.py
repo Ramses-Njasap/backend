@@ -1,14 +1,17 @@
-import json
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+
 # pass request
-def errors(field_error: str, for_developer=None, code: str = "BAD_REQUEST",
-           status_code: int = 400, main_thread: bool =True, param=None, notification: bool = False,
-           app=None):
+def errors(
+        field_error: str, for_developer=None,
+        code: str = "BAD_REQUEST", status_code: int = 400,
+        main_thread: bool = True, param=None,
+        notification: bool = False, app=None
+):
 
     error = {
         "message": {
@@ -29,7 +32,7 @@ def errors(field_error: str, for_developer=None, code: str = "BAD_REQUEST",
         error_raise = serializers.ValidationError(error)
         error_raise.status_code = status_code
         raise error_raise
-    
+
     else:
 
         channel_layer = get_channel_layer()
@@ -50,8 +53,11 @@ def errors(field_error: str, for_developer=None, code: str = "BAD_REQUEST",
 
         else:
             error["message"]["field"] = "SERVER ERROR"
-            error["developer"] = f"Websocket URL variable Is {None} Or {type(param)} Whereas `int` Is Needed"
-            
+            error["developer"] = (
+                f"""Websocket URL variable Is {None}
+                 Or {type(param)} Whereas `int` Is Needed"""
+            )
+
             async def send_error_data():
                 await channel_layer.group_send(
                     f"user_{param}",
@@ -61,15 +67,16 @@ def errors(field_error: str, for_developer=None, code: str = "BAD_REQUEST",
                     }
                 )
 
-            # Convert the asynchronous function to a synchronous one
+            # Convert the asynchronous function to
+            # a synchronous one
             async_to_sync(send_error_data)()
 
 
 def serializer_errors(serializer_errors):
     default_errors = serializer_errors
-        
+
     new_error = []
-    
+
     for field_name, field_errors in default_errors.items():
         error = {
             "message": {
@@ -87,7 +94,10 @@ def serializer_errors(serializer_errors):
     return new_error
 
 
-def websocket_errors(g_name: str, info: str, for_developer: str, code: str = "BAD_REQUEST", status_code: int = 400):
+def websocket_errors(
+        g_name: str, info: str, for_developer: str,
+        code: str = "BAD_REQUEST", status_code: int = 400
+):
 
     error = {
         "message": {
@@ -107,13 +117,16 @@ def websocket_errors(g_name: str, info: str, for_developer: str, code: str = "BA
             **error
         }
     )
-    
+
     return
 
 
 class APIExceptionError(APIException):
 
-    def __init__(self, detail=None, messages=None, status_code=None, code=None):
+    def __init__(
+            self, detail=None, messages=None,
+            status_code=None, code=None
+    ):
         if detail is None:
             detail = "An error occurred"
         if messages is None:
@@ -122,7 +135,7 @@ class APIExceptionError(APIException):
             status_code = 400
         if code is None:
             code = "error"
-            
+
         self.messages = messages
         self.status_code = status_code
         self.detail = detail

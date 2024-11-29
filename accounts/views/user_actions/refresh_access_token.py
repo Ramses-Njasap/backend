@@ -17,9 +17,10 @@ class RefreshAccessToken(APIView):
 
         # Initializing `UserAuthToken`
 
-        user_auth_token =  UserAuthToken()
+        user_auth_token = UserAuthToken()
 
-        access, refresh = user_auth_token.refresh_access_token(refresh_token=refresh_token, renew=renew)
+        access, refresh = user_auth_token.refresh_access_token(
+            refresh_token=refresh_token, renew=renew)
 
         tokens_data = {
             "access": {

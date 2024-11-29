@@ -1,4 +1,4 @@
-from properties.models.profiles import Profile
-from properties.models.homes import Home, Room, RoomPartition
-from properties.models.boundaries import Boundary
-from properties.models.amenities import Amenity
+from properties.models.profiles import Profile  # noqa: F401
+from properties.models.homes import Home, Room, RoomPartition  # noqa: F401
+from properties.models.boundaries import Boundary  # noqa: F401
+from properties.models.amenities import Amenity  # noqa: F401

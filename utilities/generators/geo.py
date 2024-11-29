@@ -1,7 +1,13 @@
-import requests, logging, math
 from utilities import response as error_response
 from django.conf import settings
-from typing import Optional, Dict
+from typing import Optional, Dict, List
+
+from django.contrib.gis.geos import Point, Polygon
+from django.contrib.gis.db import models
+
+import requests
+import logging
+import math
 
 
 class Nominatim:
@@ -11,7 +17,11 @@ class Nominatim:
 
     def get_location_name(self, longitude: str, latitude: str) -> str:
         feature = self._get_feature_from_coordinates(longitude, latitude)
-        return feature.get('place_name', "Unknown Location") if feature else "Unknown Location"
+
+        if feature:
+            return feature.get('place_name', "Unknown Location")
+        else:
+            return "Unknown Location"
 
     def get_place_data(self, longitude: str, latitude: str) -> Dict:
         feature = self._get_feature_from_coordinates(longitude, latitude)
@@ -29,7 +39,10 @@ class Nominatim:
         feature = self._get_feature_from_place_name(place_name)
         return self._extract_place_data(feature) if feature else {}
 
-    def _get_feature_from_coordinates(self, longitude: str, latitude: str) -> Optional[Dict]:
+    def _get_feature_from_coordinates(
+            self, longitude: str, latitude: str
+    ) -> Optional[Dict]:
+
         location_data = self.geocode(longitude, latitude)
         return location_data.get('features', [{}])[0] if location_data else None
 
@@ -39,7 +52,11 @@ class Nominatim:
 
     def geocode(self, longitude: str, latitude: str) -> Optional[Dict]:
         if not self._validate_coordinates(longitude, latitude):
-            self._log_error('Invalid Coordinates', 'Longitude and Latitude are out of valid range.', 400)
+            self._log_error(
+                'Invalid Coordinates',
+                'Longitude and Latitude are out of valid range.',
+                400
+            )
             return None
 
         url = self._build_geocode_url(longitude, latitude)
@@ -59,14 +76,20 @@ class Nominatim:
             return None
 
     def _build_geocode_url(self, longitude: str, latitude: str) -> str:
-        return (f"https://api.mapbox.com/geocoding/v5/mapbox.places/"
-                f"{longitude},{latitude}.json?access_token={settings.APPLICATION_SETTINGS['MAPBOX_API_KEY']}"
-                f"&language={self.language}")
+        return (
+            f"""https://api.mapbox.com/geocoding/v5/mapbox.places/
+            {longitude},{latitude}.json?access_token=
+            {settings.APPLICATION_SETTINGS['MAPBOX_API_KEY']}
+            &language={self.language}"""
+        )
 
     def _build_forward_geocode_url(self, place_name: str) -> str:
-        return (f"https://api.mapbox.com/geocoding/v5/mapbox.places/"
-                f"{place_name}.json?access_token={settings.APPLICATION_SETTINGS['MAPBOX_API_KEY']}"
-                f"&language={self.language}")
+        return (
+            f"""https://api.mapbox.com/geocoding/v5/mapbox.places/
+            {place_name}.json?access_token=
+            {settings.APPLICATION_SETTINGS['MAPBOX_API_KEY']}
+            &language={self.language}"""
+        )
 
     def _validate_coordinates(self, longitude: str, latitude: str) -> bool:
         return -180 <= float(longitude) <= 180 and -90 <= float(latitude) <= 90
@@ -87,17 +110,21 @@ class Nominatim:
             'coordinates': feature.get('center'),
             'bbox': feature.get('bbox')
         }
-    
+
     # For Elevation
     def get_elevation(self, longitude: str, latitude: str, zoom=15) -> float:
         x_tile, y_tile = self._lat_lon_to_tile(latitude, longitude, zoom)
-        url = (f"https://api.mapbox.com/v4/mapbox.terrain-rgb/"
-               f"{zoom}/{x_tile}/{y_tile}@2x.pngraw?"
-               f"access_token={settings.APPLICATION_SETTINGS['MAPBOX_API_KEY']}")
-        
+        url = (
+            f"""https://api.mapbox.com/v4/mapbox.terrain-rgb/
+            {zoom}/{x_tile}/{y_tile}@2x.pngraw?access_token=
+            {settings.APPLICATION_SETTINGS['MAPBOX_API_KEY']}"""
+        )
+
         response = requests.get(url)
         if response.status_code != 200:
-            raise Exception(f"Failed to retrieve elevation data: {response.status_code}")
+            raise Exception(
+                f"Failed to retrieve elevation data: {response.status_code}"
+            )
 
         # Extract the RGB values from the image
         rgb = self._extract_rgb_from_image(response.content)
@@ -107,7 +134,13 @@ class Nominatim:
         lat_rad = math.radians(lat)
         n = 2.0 ** zoom
         x_tile = int((lon + 180.0) / 360.0 * n)
-        y_tile = int((1.0 - math.log(math.tan(lat_rad) + (1 / math.cos(lat_rad))) / math.pi) / 2.0 * n)
+        y_tile = int(
+            (
+                1.0 - math.log(
+                    math.tan(lat_rad) + (1 / math.cos(lat_rad))
+                ) / math.pi
+            ) / 2.0 * n
+        )
         return x_tile, y_tile
 
     def _extract_rgb_from_image(self, image_data: bytes) -> Dict[str, int]:
@@ -135,12 +168,11 @@ class Nominatim:
         )
 
 
-from typing import List
-from django.contrib.gis.geos import Point, Polygon
-from django.db import models
-
 class GeospatialBoundaryManager:
-    def __init__(self, user_id: int, model_instance: models.Model = None, polygon_field: str = None, save_to_db: bool = True):
+    def __init__(self, user_id: int,
+                 model_instance: models.Model = None,
+                 polygon_field: str = None, save_to_db: bool = True):
+
         self.user_id = user_id
         self.model_instance = model_instance
         self.polygon_field = polygon_field
@@ -151,13 +183,28 @@ class GeospatialBoundaryManager:
 
     def create_polygon(self, coordinates: List[Dict[str, float]]) -> Polygon:
         if len(coordinates) < 3:
-            self._log_error("At least three points are required to create a polygon.", "Insufficient points to form a polygon.", 'BAD_REQUEST', 400)
+            self._log_error(
+                "At least three points are required to create a polygon.",
+                "Insufficient points to form a polygon.",
+                'BAD_REQUEST',
+                400
+            )
+
             return None
 
         try:
-            points = [Point(coord["longitude"], coord["latitude"]) for coord in coordinates]
+            points = [
+                Point(coord["longitude"], coord["latitude"])
+                for coord in coordinates
+            ]
         except KeyError as e:
-            self._log_error("Missing Location Info", f"Missing Coordinate Key(s): {e}", 'BAD_REQUEST', 400)
+            self._log_error(
+                "Missing Location Info",
+                f"Missing Coordinate Key(s): {e}",
+                'BAD_REQUEST',
+                400
+            )
+
             return None
 
         points.append(points[0])  # Close the polygon
@@ -170,7 +217,13 @@ class GeospatialBoundaryManager:
 
     def _save_polygon_to_db(self, polygon: Polygon):
         if not (self.model_instance and self.polygon_field):
-            self._log_error("Model and polygon field must be provided if save_to_db is True.", "Missing model or field for database save.", 'BAD_REQUEST', 400)
+            self._log_error(
+                "Model and polygon field must be provided if save_to_db is True.",
+                "Missing model or field for database save.",
+                "BAD_REQUEST",
+                400
+            )
+
             return
 
         try:
@@ -183,9 +236,17 @@ class GeospatialBoundaryManager:
             setattr(self.model_instance, "location_name", location_name)
             self.model_instance.save()
         except Exception as e:
-            self._log_error("Unable to Save Location Info", str(e), 'INTERNAL_SERVER_ERROR', 500)
+            self._log_error(
+                "Unable to Save Location Info",
+                str(e),
+                "INTERNAL_SERVER_ERROR",
+                500
+            )
 
-    def _log_error(self, field_error: str, for_developer: str, code: str, status_code: int):
+    def _log_error(self, field_error: str,
+                   for_developer: str, code: str,
+                   status_code: int):
+
         logging.error(f'{for_developer}')
         error_response.errors(
             field_error=field_error,

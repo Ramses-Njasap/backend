@@ -20,20 +20,28 @@ from django.conf import settings
 from django.conf.urls.static import static
 from utilities.views.sample import sample_view
 
+# Base URL patterns
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
+# Account-related URL patterns
 accounts_urlpatterns = [
     path('api/users/', include('accounts.urls.users')),
-    path("api/account/", include("accounts.urls.account")),
-    path('api/plans/', include("accounts.urls.plans", namespace="plans")),
-    path(settings.APPLICATION_SETTINGS["LOGIN_URL"]["BASE"], include("accounts.urls.actions", namespace="actions")),
+    path('api/account/', include('accounts.urls.account')),
+    path('api/plans/', include('accounts.urls.plans', namespace='plans')),
+    path(
+        settings.APPLICATION_SETTINGS["LOGIN_URL"]["BASE"],
+        include('accounts.urls.actions', namespace='actions'),
+    ),
     path('sample-url/', sample_view, name='sample-view'),
 ]
 
-# parsing static urls to static_urlpatterns
-# this will be use to navigate through static contents (especially images) in the any browser
-static_urlpatterns = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Static file URL patterns
+static_urlpatterns = (
+    static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+)
 
+# Combine all patterns
 urlpatterns += accounts_urlpatterns + static_urlpatterns

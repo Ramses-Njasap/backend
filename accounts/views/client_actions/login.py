@@ -1,5 +1,4 @@
 # Import necessary libraries and modules from rest_framework
-from rest_framework.views import APIView
 
 
 # Login view class that extends from APIView

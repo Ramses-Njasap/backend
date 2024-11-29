@@ -1,4 +1,4 @@
-from django.urls import re_path, path
+from django.urls import path
 
 from utilities.websockets.device import DeviceConsumer
 from utilities.websockets.errors import ErrorDisplayConsumer

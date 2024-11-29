@@ -1,10 +1,4 @@
 from django.db import models
-from django.core.validators import (MaxValueValidator, MinValueValidator)
-
-from utilities.conversions import String
-from utilities.generators.string_generators import QueryID
-
-import uuid
 
 
 class OTP(models.Model):
@@ -18,21 +12,30 @@ class OTP(models.Model):
 
 class LoginOTP(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
-    used_otp = models.ManyToManyField('OTP', through='UsedOTP', related_name='login_otp')
+    used_otp = models.ManyToManyField('OTP',
+                                      through='UsedOTP',
+                                      related_name='login_otp')
+
     current_otp = models.OneToOneField('OTP', on_delete=models.DO_NOTHING, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
 class PhoneNumberVerificationOTP(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
-    used_otp = models.ManyToManyField('OTP', through='UsedOTP', related_name='phone_number_used_otp')
+    used_otp = models.ManyToManyField('OTP',
+                                      through='UsedOTP',
+                                      related_name='phone_number_used_otp')
+
     current_otp = models.OneToOneField('OTP', on_delete=models.DO_NOTHING, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
 class EmailVerificationOTP(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
-    used_otp = models.ManyToManyField('OTP', through='UsedOTP', related_name='email_used_otp')
+    used_otp = models.ManyToManyField('OTP',
+                                      through='UsedOTP',
+                                      related_name='email_used_otp')
+
     current_otp = models.OneToOneField('OTP', on_delete=models.DO_NOTHING, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -43,8 +46,14 @@ class EmailVerificationOTP(models.Model):
 
 class UsedOTP(models.Model):
     otp = models.ForeignKey('OTP', on_delete=models.CASCADE)
-    phone_number_verification_otp = models.ForeignKey('PhoneNumberVerificationOTP', on_delete=models.SET_NULL, null=True)
-    email_verification_otp = models.ForeignKey(EmailVerificationOTP, on_delete=models.SET_NULL, null=True)
+    phone_number_verification_otp = models.ForeignKey(
+        'PhoneNumberVerificationOTP',
+        on_delete=models.SET_NULL, null=True)
+
+    email_verification_otp = models.ForeignKey(
+        EmailVerificationOTP,
+        on_delete=models.SET_NULL, null=True)
+
     login_otp = models.ForeignKey(LoginOTP, on_delete=models.SET_NULL, null=True)
     is_active = models.BooleanField(default=True)
     used_on = models.DateTimeField(auto_now_add=True)
@@ -75,7 +84,9 @@ class KYCVerificationCheck(models.Model):
     id_card_verified = models.BooleanField(default=False)
     passport_verified = models.BooleanField(default=False)
     driver_license_verified = models.BooleanField(default=False)
-    real_estate_certifications = models.OneToOneField('RealEstateCertification', on_delete=models.DO_NOTHING, null=True, blank=True)
+    real_estate_certifications = models.OneToOneField(
+        'RealEstateCertification',
+        on_delete=models.DO_NOTHING, null=True, blank=True)
 
     class Meta:
         verbose_name = 'KYC Verification'
@@ -91,7 +102,7 @@ class KYCVerificationCheck(models.Model):
 
                     if field_value:
                         total_score += getattr(self.FieldScoreValue, field.name, 0)
-        
+
         return total_score
 
 
@@ -105,7 +116,11 @@ class AccountVerification(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
     email_verified = models.BooleanField(default=False)
     phone_number_verified = models.BooleanField(default=False)
-    kyc_verification_check = models.OneToOneField('KYCVerificationCheck', on_delete=models.DO_NOTHING, null=True, blank=True)
+    kyc_verification_check = models.OneToOneField(
+        'KYCVerificationCheck',
+        on_delete=models.DO_NOTHING, null=True,
+        blank=True)
+
     score = models.DecimalField(default=0, decimal_places=2, max_digits=5)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
@@ -115,7 +130,6 @@ class AccountVerification(models.Model):
         verbose_name_plural = 'Account Verifications'
         ordering = ['-score']
 
-    
     """
     THIS PARTICULAR FUNCTION HARD ME. I GO CHECK'AM AFTER I DON GET SENSE
     """
@@ -131,12 +145,12 @@ class AccountVerification(models.Model):
                 if isinstance(field, models.BooleanField):
                     # Get the field value (True/False)
                     field_value = getattr(self, field.name)
-                    
+
                     # If the field is True, add its corresponding score
                     if field_value:
                         total_score += getattr(self.FieldScoreValue, field.name, 0)
-        
-        total_score += ((self.kyc_verification_check.get_score/200) * 80)
+
+        total_score += ((self.kyc_verification_check.get_score / 200) * 80)
 
         return total_score
 
