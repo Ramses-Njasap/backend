@@ -37,7 +37,7 @@ class ExchangeRates:
                v6/{settings.EXCHANGE_RATE_API}/latest/USD""")
 
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=60)
             data = response.json()
         except requests.RequestException:
             return

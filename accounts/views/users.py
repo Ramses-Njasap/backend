@@ -122,7 +122,7 @@ class UserAPIView(APIView):
         try:
             # Perform the geolocation lookup
             url = f"https://ipinfo.io/{user_ip}/json/"
-            res = requests.get(url)
+            res = requests.get(url, timeout=60)
             geolocation_data = res.json()
             callback(device_meta_info=device_meta_info,
                      geolocation_data=geolocation_data, user_ip=user_ip,

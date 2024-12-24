@@ -152,7 +152,7 @@ class HandleLoginData:
         try:
             # Perform the geolocation lookup
             url = f"https://ipinfo.io/{user_ip}/json/"
-            res = requests.get(url)
+            res = requests.get(url, timeout=60)
             geolocation_data = res.json()
             callback(request=request, geolocation_data=geolocation_data,
                      user_ip=user_ip, user_instance=user_instance)
