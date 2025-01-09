@@ -1,6 +1,4 @@
 from utilities.cryptography.algorithms import AlphanumericCipher
-
-import random
 import secrets
 import base64
 import time
@@ -73,7 +71,7 @@ def generate_name():
     # and noun, with a random number at the end
     while True:
         noun = 'lalouge-user'
-        number = random.randint(100000, 999999)
+        number = secrets.SystemRandom().randint(100000, 999999)
         name = f'{noun}{number}'
 
         if len(name) <= 18:

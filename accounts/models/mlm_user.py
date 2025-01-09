@@ -30,11 +30,10 @@ MLM User = MultiLevel Marketing User
 from django.db import models
 from decimal import Decimal, ROUND_DOWN
 from django.db.models import Sum, F
-
-import random
 import string
 
 from accounts.models.users import User
+import secrets
 
 
 class MLMUser(models.Model):
@@ -125,7 +124,7 @@ class MLMUser(models.Model):
     def generate_unique_referral_code(self):
         characters = string.ascii_uppercase + string.digits
         while True:
-            new_code = ''.join(random.choice(characters) for _ in range(8))
+            new_code = ''.join(secrets.choice(characters) for _ in range(8))
             if not MLMUser.objects.filter(referral_code=new_code).exists():
                 return new_code
 
