@@ -4,6 +4,7 @@ from django.conf import settings
 from decimal import Decimal
 
 import requests
+from security import safe_requests
 
 # Define a very large timeout value, e.g., 10 years
 ONE_MONTH_TIMEOUT = 30 * 24 * 60 * 60  # 1 month
@@ -37,7 +38,7 @@ class ExchangeRates:
                v6/{settings.EXCHANGE_RATE_API}/latest/USD""")
 
         try:
-            response = requests.get(url)
+            response = safe_requests.get(url)
             data = response.json()
         except requests.RequestException:
             return

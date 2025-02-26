@@ -8,6 +8,7 @@ from django.contrib.gis.db import models
 import requests
 import logging
 import math
+from security import safe_requests
 
 
 class Nominatim:
@@ -68,7 +69,7 @@ class Nominatim:
 
     def _perform_request(self, url: str) -> Optional[Dict]:
         try:
-            response = requests.get(url)
+            response = safe_requests.get(url)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -120,7 +121,7 @@ class Nominatim:
             {settings.APPLICATION_SETTINGS['MAPBOX_API_KEY']}"""
         )
 
-        response = requests.get(url)
+        response = safe_requests.get(url)
         if response.status_code != 200:
             raise Exception(
                 f"Failed to retrieve elevation data: {response.status_code}"
