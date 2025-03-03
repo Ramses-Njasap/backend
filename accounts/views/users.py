@@ -1,12 +1,22 @@
+from typing import List, Union
+from django.conf import settings
+from django.utils.timezone import now
+
 # Import necessary libraries and modules from rest_framework
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
 # Import models from accounts models
-from accounts.models.users import User
+from accounts.models.users import User, APIKey
 from accounts.models.devices import Device, DeviceLoginHistory
-from accounts.models.account import PhoneNumberVerificationOTP, EmailVerificationOTP
+from accounts.models.settings import UserSettings
+from accounts.models.mlm_user import MLMUser
+from accounts.models.profiles import UserProfile
+from accounts.models.account import (
+    PhoneNumberVerificationOTP, EmailVerificationOTP, AccountVerification,
+    KYCVerificationCheck, RealEstateCertification
+)
 
 # Import serializers from accounts serializer
 from accounts.serializers.users import UserSerializer
@@ -21,9 +31,16 @@ from rest_framework.pagination import PageNumberPagination
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+from datetime import timedelta
+
 import time
 import requests
 import threading
+import secrets
+
+
+# Load Application Settings
+app_settings = getattr(settings, "APPLICATION_SETTINGS", {})
 
 
 class CustomPageNumberPagination(PageNumberPagination):
@@ -79,7 +96,7 @@ class UserAPIView(APIView):
 
             # Perform geolocation lookup in a separate thread
             geolocation_thread = threading.Thread(
-                target=self.get_geolocation,
+                target=self._completion,
                 args=(request.device_meta_info, user_ip,
                       self.handle_geolocation, user_instance))
 
@@ -118,7 +135,82 @@ class UserAPIView(APIView):
         # If the data is not valid, return validation errors
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_geolocation(self, device_meta_info, user_ip, callback, user_instance):
+    def generate_api_key(
+            self, user, name=None, expires_in_days=None, scopes=None
+    ):
+        """
+        Generate and associate an API key with the user.
+
+        Args:
+            user: User instance.
+            name (str): A name for the API key (optional).
+            expires_in_days (int): Number of days until the key expires (optional).
+            scopes (str): A comma-separated list of scopes (optional).
+
+        Returns:
+            APIKey: The created APIKey instance.
+        """
+        key = secrets.token_urlsafe(32)
+        expires_at = None
+        if expires_in_days:
+            expires_at = now() + timedelta(days=expires_in_days)
+        return APIKey.objects.create(
+            user=user,
+            key=key,
+            name=name,
+            expires_at=expires_at,
+            scopes=scopes
+        )
+
+    def _user_completion(self, instance):
+        if instance:
+            UserProfile.objects.create(user=instance)
+
+            UserSettings.objects.create(user=instance)
+
+            real_estate_certifications_instance = (
+                RealEstateCertification.objects.create(
+                    user=instance
+                )
+            )
+
+            kyc_verification_check_instance = (
+                KYCVerificationCheck.objects.create(
+                    user=instance,
+                    real_estate_certifications=real_estate_certifications_instance
+                )
+            )
+
+            AccountVerification.objects.create(
+                user=instance,
+                kyc_verification_check=kyc_verification_check_instance
+            )
+
+            if instance.is_mlm_user:
+                MLMUser.objects.create(user=instance)
+
+            # if user is external user
+            if instance.user_type.lower() == instance.UserType.EXTERNAL.lower():
+                self.generate_api_key(
+                    user=instance,
+                    expires_in_days=(
+                        app_settings.get("API_KEY", {}).get("EXPIRES_IN", 14)
+                    )
+                )
+
+    def _completion(self, device_meta_info, user_ip, callback, user_instance):
+        try:
+            self._user_completion(instance=user_instance)
+        except Exception as e:
+            response.errors(
+                field_error="Failure To Get Device GeoLocation Data",
+                for_developer=f"{str(e)}",
+                code="SERVER_ERROR",
+                status_code=1011,
+                main_thread=False,
+                param=user_instance.pk
+            )
+
         try:
             # Perform the geolocation lookup
             url = f"https://ipinfo.io/{user_ip}/json/"
@@ -269,12 +361,56 @@ class UserAPIView(APIView):
 
         return
 
+    def get_users(
+        self, users: Union[str, List[str]]
+    ) -> Union[dict, List[dict]]:
+
+        if isinstance(users, str):
+            user_instance = User.get_user(query_id=users)
+            serialized_data = UserSerializer(user_instance)
+        elif isinstance(users, list):
+            user_instance = User.get_user(query_id=users)
+            serialized_data = UserSerializer(
+                user_instance, many=True
+            )
+
+        return (
+            serialized_data.data
+            if serialized_data
+            else None
+        )
+
     # Define a method that handles GET requests
     def get(self, request):
 
-        # Retrieve all user instances and serialize them for response
-        user_instances = User.objects.all()
+        is_single_user = request.GET.get("user", None)
+        is_multiple_users = request.GET.get("users", None)
 
-        serializer = UserSerializer(user_instances, many=True)
+        if is_single_user or is_multiple_users:
+            get_users = self.get_users(
+                is_single_user
+                if is_single_user
+                else is_multiple_users
+            )
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            user_instance = User.objects.all()
+            serialized_data = UserSerializer(
+                user_instance, many=True
+            )
+            get_users = (
+                serialized_data.data
+                if serialized_data
+                else None
+            )
+
+        return (
+            Response(
+                get_users,
+                status=status.HTTP_200_OK
+            )
+            if get_users
+            else Response(
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        )

@@ -31,7 +31,7 @@ from django.db import models
 from decimal import Decimal, ROUND_DOWN
 from django.db.models import Sum, F
 
-import random
+import secrets
 import string
 
 from accounts.models.users import User
@@ -125,7 +125,8 @@ class MLMUser(models.Model):
     def generate_unique_referral_code(self):
         characters = string.ascii_uppercase + string.digits
         while True:
-            new_code = ''.join(random.choice(characters) for _ in range(8))
+            # Use secrets.choice for secure random selection
+            new_code = ''.join(secrets.choice(characters) for _ in range(8))
             if not MLMUser.objects.filter(referral_code=new_code).exists():
                 return new_code
 

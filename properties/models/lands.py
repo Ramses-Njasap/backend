@@ -1,13 +1,14 @@
 from django.contrib.gis.db import models
-from django.utils.translation import gettext_lazy as _
+
+from properties.models.environments import Environment
 
 
-class Land(models.Model):
-    # ref_id = models.CharField(_("Reference Identity"), max_length=100)
-    latitude = models.FloatField(_("Latitude"))
-    longitude = models.FloatField(_("Longitude"))
-
-    boundary = models.PolygonField()
+class LandProperty(models.Model):
+    environment = models.OneToOneField(
+        Environment, on_delete=models.CASCADE,
+        null=False, blank=False
+    )
 
     class Meta:
-        verbose_name_plural = 'Boundaries'
+        verbose_name = 'Land Property'
+        verbose_name_plural = 'Land Properties'

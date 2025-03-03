@@ -70,7 +70,6 @@ class Verification:
                 send_email_task.delay(
                     html_content=html_content,
                     user_pk=self.user.pk,
-                    otp_code=otp_code,
                     recipient_list=recipient_list,
                     sender=sender,
                     subject=subject

@@ -22,7 +22,6 @@ import socket
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 env = environ.Env()
 
 # Reading .env file
@@ -103,7 +102,6 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'utilities.middleware.IsUserRobot',
     'utilities.middleware.DeviceMetaInfoMiddleware',
-    'utilities.middleware.CheckUnmatchedURLMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -362,16 +360,16 @@ APPLICATION_SETTINGS = {
 
     # How Long Should A Device Delay Before Refreshing Its Access Token
     # So As To Gain Trust
-    "DEVICE_REFRESH_ACCESS_TOKEN_DELAY": 2,
+    "DEVICE_REFRESH_ACCESS_TOKEN_DELAY": 2,  # type=int
 
-    "LOOP_MAX_RETRY": 10,
+    "LOOP_MAX_RETRY": 10,  # type=int
 
     # An OTP Can Last For A Period Of Time
     # Default = 10 Minutes
     "OTP_LIFETIME": timedelta(minutes=10),
 
-    "IP_MATCH_PROBABILITY_PASS_SCORE": 0.7,
-    "DEVICE_DATA_SIMILARITY_MATCH_SCORE": 0.7,
+    "IP_MATCH_PROBABILITY_PASS_SCORE": 0.7,  # type=float
+    "DEVICE_DATA_SIMILARITY_MATCH_SCORE": 0.7,  # type=float
 
     "LOGIN_URL": {
         "BASE": "api/actions/",
@@ -381,7 +379,29 @@ APPLICATION_SETTINGS = {
         "BASE": "api/actions/",
         "URL": "request/login-otp/"
     },
-    "MABBOX_API_KEY": os.environ.get('MAPBOX_API_KEY', None)
+    "MABBOX_API_KEY": os.environ.get('MAPBOX_API_KEY', None),
+    "API_KEY": {
+        "EXPIRES_IN": 14,  # in days, type=int
+    },
+    "DEFAULT_CURRENCY": {
+        "name": "US Dollar",
+        "symbol": "$",
+        "code": "USD"
+    },
+    "DEFAULT_LANGUAGE": {
+        "name": "English",
+        "code": "en",
+        "flag": "🇬🇧"
+    },
+    "SUBSCRIPTION_DEFAULTS": {
+        "MAXIMUM_INVITE": 2,  # type=int
+        "INVITE_COMMISSION": 10,  # In percentage, type=int
+        "MAXIMUM_CONFLICT": 1,  # type=int
+        "MAXIMUM_TEAM": 1,  # type=int
+        "AI_MARKETING_MAXIMUM_ROUNDS": 2,  # type=int
+        "SALE_COMMISSION": 0.01,  # type=float
+        "RENTAL_COMMISSION": 0.05,  # type=float
+    }
 }
 
 ANYMAIL = {
@@ -396,7 +416,7 @@ BREVO_SETTINGS = {
     "BREVO_API_KEY": os.environ.get('BREVO_API_KEY', None),
     "SENDER_EMAIL": {
         "NO_REPLY": {
-            "email": "noreply@gmail.com",
+            "email": "ramsesnjasap11@gmail.com",
             "name": "No Reply"
         }
     }

@@ -1,4 +1,4 @@
-import random
+import secrets
 
 
 class AlphanumericCipher:
@@ -10,9 +10,10 @@ class AlphanumericCipher:
         self.key = self.generate_key()
 
     def generate_key(self):
-        # Generating a random permutation of alphanumeric characters
+        # Generating a random permutation of alphanumeric characters using secrets
+        secure_random = secrets.SystemRandom()
         key = list(self.characters)
-        random.shuffle(key)
+        secure_random.shuffle(key)  # Use secure shuffle
         return dict(zip(self.characters, key))
 
     def encrypt(self, message):

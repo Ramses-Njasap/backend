@@ -1,51 +1,50 @@
 from django.core.cache import cache
 from django.conf import settings
-
 from decimal import Decimal
-
 import requests
 
-# Define a very large timeout value, e.g., 10 years
+# Define a timeout value (1 month)
 ONE_MONTH_TIMEOUT = 30 * 24 * 60 * 60  # 1 month
-CACHE_KEY = 'exchange_rate'
+BASE_CURRENCY = 'USD'
 
 
 class ExchangeRates:
     def get_exchange_rate(self, to_currency: str = 'USD') -> Decimal:
-        if to_currency.upper() == 'USD':
+        """Retrieve exchange rate for the specified currency."""
+        if to_currency.upper() == BASE_CURRENCY:
             return Decimal(1)
 
-        exchange_rate = cache.get(CACHE_KEY)
+        # Generate a unique cache key for this currency
+        cache_key = f'exchange_rate_{to_currency.upper()}'
+        exchange_rate = cache.get(cache_key)
 
         if exchange_rate is None:
-            exchange_rate = self._fetch_exchange_rate()
-            cache.set(CACHE_KEY, exchange_rate, timeout=ONE_MONTH_TIMEOUT)
+            # Fetch rates and store them in the cache
+            self.store_exchange_rates_to_cache()
+            exchange_rate = cache.get(cache_key)
 
-        return exchange_rate
+        return Decimal(exchange_rate or 0)
 
-    def _fetch_exchange_rate(self) -> Decimal:
-
-        # Attempt to get the exchange rate from the cache
-        cached_rate = cache.get(CACHE_KEY)
-        if cached_rate is not None:
-            return Decimal(cached_rate)
-
-        return Decimal(0)
-
-    def store_exchange_rates_to_cache(self):
-        url = (f"""https://v6.exchangerate-api.com/
-               v6/{settings.EXCHANGE_RATE_API}/latest/USD""")
+    def _fetch_exchange_rates(self) -> dict:
+        """Fetch exchange rates from the external API."""
+        api_key = settings.EXCHANGE_RATE_API
+        url = f"https://v6.exchangerate-api.com/v6/{api_key}/latest/{BASE_CURRENCY}"
+        print(f"Fetching exchange rates from: {url}")
 
         try:
             response = requests.get(url)
+            response.raise_for_status()
             data = response.json()
-        except requests.RequestException:
-            return
+            return data.get('conversion_rates', {})
+        except requests.RequestException as e:
+            print(f"Error fetching exchange rates: {e}")
+            return {}
 
-        if response.status_code != 200:
-            return
-
-        rates = data.get('conversion_rates', {})
+    def store_exchange_rates_to_cache(self):
+        """Store exchange rates in the cache."""
+        rates = self._fetch_exchange_rates()
 
         for currency, rate in rates.items():
-            cache.set(CACHE_KEY, Decimal(rate), timeout=ONE_MONTH_TIMEOUT)
+            # Create a unique cache key for each currency
+            cache_key = f'exchange_rate_{currency.upper()}'
+            cache.set(cache_key, Decimal(rate), timeout=ONE_MONTH_TIMEOUT)

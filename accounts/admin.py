@@ -1,8 +1,13 @@
 from django.contrib import admin
-from accounts.models.users import User
+from accounts.models.users import User, APIKey
 from accounts.models.mlm_user import MLMUser
 from accounts.models.profiles import UserProfile
-from accounts.models.plans import SubscriptionPlan, UserSubscriptionPlan
+from accounts.models.plans import (
+    DefaultFeature, AIConflictResolutionAssistantFeature,
+    TeamGoalFeature, AIMarketingAssistantFeature,
+    MultiLevelMarketingFeature, BusinessFeature,
+    SubscriptionPlan, UserSubscriptionPlan
+)
 
 from accounts.models.account import (OTP, PhoneNumberVerificationOTP,
                                      EmailVerificationOTP, LoginOTP,
@@ -15,8 +20,15 @@ from accounts.models.devices import (DeviceLoginHistory, DeviceTokenBlacklist,
 
 # Register your models here.
 admin.site.register(User)
+admin.site.register(APIKey)
 admin.site.register(MLMUser)
 admin.site.register(UserProfile)
+admin.site.register(DefaultFeature)
+admin.site.register(AIConflictResolutionAssistantFeature)
+admin.site.register(TeamGoalFeature)
+admin.site.register(AIMarketingAssistantFeature)
+admin.site.register(MultiLevelMarketingFeature)
+admin.site.register(BusinessFeature)
 admin.site.register(SubscriptionPlan)
 admin.site.register(UserSubscriptionPlan)
 

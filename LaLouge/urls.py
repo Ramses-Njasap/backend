@@ -37,6 +37,41 @@ accounts_urlpatterns = [
     path('sample-url/', sample_view, name='sample-view'),
 ]
 
+properties_urlpatterns = [
+    path(
+        'api/properties/amenities/',
+        include('properties.urls.amenities', namespace='amenities')
+    ),
+    path(
+        'api/properties/buildings/',
+        include('properties.urls.buildings', namespace='buildings')
+    ),
+    path(
+        'api/properties/environments/',
+        include('properties.urls.environments', namespace='environments')
+    ),
+    path(
+        'api/properties/lands/',
+        include('properties.urls.lands', namespace='lands')
+    ),
+    path(
+        'api/properties/profiles/',
+        include('properties.urls.profiles', namespace='profiles')
+    ),
+    path(
+        'api/properties/residentials/',
+        include('properties.urls.residentials', namespace='residentials')
+    ),
+    path(
+        'api/properties/rooms/',
+        include('properties.urls.rooms', namespace='rooms')
+    ),
+    path(
+        'api/properties/units/',
+        include('properties.urls.units', namespace='units')
+    ),
+]
+
 # Static file URL patterns
 static_urlpatterns = (
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
@@ -44,4 +79,7 @@ static_urlpatterns = (
 )
 
 # Combine all patterns
-urlpatterns += accounts_urlpatterns + static_urlpatterns
+urlpatterns += (
+    accounts_urlpatterns + properties_urlpatterns
+    + static_urlpatterns
+)

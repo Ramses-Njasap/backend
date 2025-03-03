@@ -3,7 +3,8 @@ from django.conf import settings
 
 from accounts.views.actions import (RedirectLoginView,
                                     RedirectRefreshAccessTokenView,
-                                    RedirectLogoutView, RequestLoginOTP)
+                                    RedirectLogoutView, RequestLoginOTP,
+                                    ChangePasswordAPIView)
 
 
 app_name = "actions"
@@ -18,4 +19,7 @@ urlpatterns = [
 
     path("refresh-access-token/",
          RedirectRefreshAccessTokenView.as_view(), name="refresh_access_token"),
+
+    path("change-password/",
+         ChangePasswordAPIView.as_view(), name="change_password"),
 ]

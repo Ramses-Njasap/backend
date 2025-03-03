@@ -213,7 +213,7 @@ class RequestLoginOTP(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class ChangePasswordAPI(APIView):
+class ChangePasswordAPIView(APIView):
     permission_classes = (GrantPermission,)
 
     def password_similarity(self, current_password: str,

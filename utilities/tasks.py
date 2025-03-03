@@ -22,6 +22,8 @@ def send_email_task(
     sender: dict[str, str], subject: str
 ):
 
+    print("DID IT GET HERE ???")
+
     # Configure API key authorization
     configuration = sib_api_v3_sdk.Configuration()
     configuration.api_key['api-key'] = settings.BREVO_SETTINGS['BREVO_API_KEY']
@@ -40,9 +42,12 @@ def send_email_task(
     )
 
     try:
+        print("TRY TRY TRY TRY")
         # Send the email
-        api_instance.send_transac_email(email)
+        answer = api_instance.send_transac_email(email)
+        print("ANSWER:\n", answer)
     except ApiException as e:
+        print("ERROR ERROR ERROR")
         response.errors(
             field_error="Failure To Send Verification Email",
             for_developer=str(e),

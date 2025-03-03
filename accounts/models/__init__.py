@@ -1,7 +1,10 @@
 from accounts.models.profiles import UserProfile  # noqa: F401
 
 from accounts.models.plans import (  # noqa: F401
-    SubscriptionPlan, CustomPlan, UserSubscriptionPlan  # noqa: F401
+    DefaultFeature, AIConflictResolutionAssistantFeature,  # noqa: F401
+    TeamGoalFeature, AIMarketingAssistantFeature,  # noqa: F401
+    MultiLevelMarketingFeature, BusinessFeature,  # noqa: F401
+    SubscriptionPlan, UserSubscriptionPlan  # noqa: F401
 )
 
 from accounts.models.mlm_user import (  # noqa: F401

@@ -1,6 +1,5 @@
 from utilities.cryptography.algorithms import AlphanumericCipher
 
-import random
 import secrets
 import base64
 import time
@@ -68,12 +67,13 @@ class QueryID:
 
 
 def generate_name():
-
-    # Generate a random name by combining a random adjective
-    # and noun, with a random number at the end
+    # Generate a random name by combining a predefined noun
+    # and a secure random number at the end
     while True:
         noun = 'lalouge-user'
-        number = random.randint(100000, 999999)
+
+        # Generates a random number in the range [100000, 999999]
+        number = secrets.randbelow(900000) + 100000
         name = f'{noun}{number}'
 
         if len(name) <= 18:

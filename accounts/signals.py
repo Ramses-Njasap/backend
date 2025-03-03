@@ -2,39 +2,18 @@ from django.db.models.signals import post_save
 from django.apps import apps
 from django.dispatch import receiver
 
-from accounts.models.settings import UserSettings
-from accounts.models.mlm_user import MLMUser
-from accounts.models.profiles import UserProfile
 from accounts.models.devices import DeviceWallet
-from accounts.models.account import (AccountVerification,
-                                     KYCVerificationCheck,
-                                     RealEstateCertification)
 
 from utilities.generators.tokens import DeviceAuthenticator
 
 
-@receiver(post_save, sender=apps.get_model('accounts', 'User'))
-def create_profile_and_referral(sender, instance, created, **kwargs):
-    """
-    Signal handler to create a UserProfile
-    and Referral instance for a new user.
-    """
-    if created:
-        UserSettings.objects.create(user=instance)
-
-        UserProfile.objects.create(user=instance)
-        real_estate_certifications_instance = RealEstateCertification.objects.create(
-            user=instance)
-
-        kyc_verification_check_instance = KYCVerificationCheck.objects.create(
-            user=instance,
-            real_estate_certifications=real_estate_certifications_instance)
-
-        AccountVerification.objects.create(
-            user=instance, kyc_verification_check=kyc_verification_check_instance)
-
-        if instance.is_mlm_user:
-            MLMUser.objects.create(user=instance)
+# @receiver(post_save, sender=apps.get_model('accounts', 'User'))
+# def create_profile_and_referral(sender, instance, created, **kwargs):
+#     """
+#     Signal handler to create a UserProfile
+#     and Referral instance for a new user.
+#     """
+#     if created:
 
 
 @receiver(post_save, sender=apps.get_model('accounts', 'Device'))

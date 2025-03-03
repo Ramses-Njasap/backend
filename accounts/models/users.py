@@ -1,11 +1,10 @@
+from typing import List, Union
 from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import (AbstractBaseUser, PermissionsMixin)
-from rest_framework.exceptions import ValidationError
+from django.utils.timezone import now
 
-# python imports
-import uuid
-import base64
+from rest_framework.exceptions import ValidationError
 
 # custom imports
 from accounts.managers.users import (CreateUserManager,
@@ -13,6 +12,10 @@ from accounts.managers.users import (CreateUserManager,
 
 from utilities import response
 from utilities.generators.string_generators import (generate_name, QueryID, Keys)
+
+# python imports
+import uuid
+import base64
 
 
 class BannedPhoneNumber(models.Model):
@@ -31,6 +34,80 @@ class BannedEmail(models.Model):
 
     def __str__(self):
         return f"{self.email} (Banned on {self.datetime_banned})"
+
+
+class APIKey(models.Model):
+    user = models.ForeignKey(
+        "User", on_delete=models.CASCADE,
+        related_name="api_keys"
+    )
+
+    key = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+    query_id = models.BinaryField(
+        null=False, blank=False, max_length=10000,
+        db_index=True
+    )
+
+    scopes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "API Key"
+        verbose_name_plural = "API Keys"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name or 'API Key'} for {self.user.username}"
+
+    # @staticmethod
+    # def generate_key():
+    #     """Generate a secure random API key."""
+    #     return secrets.token_urlsafe(40)
+
+    # def save(self, *args, **kwargs):
+    #     """Ensure the key is generated when creating a new instance."""
+    #     if not self.key:
+    #         self.key = self.generate_key()
+    #     super().save(*args, **kwargs)
+
+    def is_expired(self):
+        """Check if the key is expired."""
+        return self.expires_at and now() > self.expires_at
+
+    def deactivate(self):
+        """Deactivate the API key."""
+        self.is_active = False
+        self.save()
+
+    def activate(self):
+        """Activate the API key."""
+        self.is_active = True
+        self.save()
+
+    def add_scope(self, scope):
+        """Add a scope to the API key."""
+        if not self.scopes:
+            self.scopes = scope
+        else:
+            existing_scopes = self.scopes.split(',')
+            if scope not in existing_scopes:
+                existing_scopes.append(scope)
+                self.scopes = ','.join(existing_scopes)
+        self.save()
+
+    def remove_scope(self, scope):
+        """Remove a scope from the API key."""
+        if self.scopes:
+            scopes = self.scopes.split(',')
+            if scope in scopes:
+                scopes.remove(scope)
+                self.scopes = ','.join(scopes)
+        self.save()
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -178,12 +255,20 @@ class User(AbstractBaseUser, PermissionsMixin):
         return manager.user_exists(query_id)
 
     @classmethod
-    def get_user(cls, query_id: str) -> dict:
+    def get_user(
+        cls, query_id: Union[str, List[str]]
+    ) -> Union[dict, List[dict]]:
 
         manager = cls.get_by
 
         try:
-            query_id = base64.b64decode(query_id.encode())
+            if isinstance(query_id, str):
+                query_ids = base64.b64decode(query_id.encode())
+            elif isinstance(query_id, list):
+                query_ids = [
+                    base64.b64decode(q_id.encode())
+                    for q_id in query_id
+                ]
         except Exception as e:
             response.errors(
                 field_error="Unknown User ID. Try Again Or Contact Support.",
@@ -192,7 +277,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                 status_code=500
             )
 
-        return manager.query_id(query_id)
+        return manager.query_id(query_ids)
 
     @property
     def get_secret_key(self):

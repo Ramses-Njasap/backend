@@ -13,15 +13,16 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 
 from django.core.asgi import get_asgi_application
 
-from . import routing
+django_application = get_asgi_application()
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "LaLouge.settings")
 
-django_application = get_asgi_application()
+from . import routing  # noqa: E402
+
 
 application = ProtocolTypeRouter(
     {
-        "http": get_asgi_application(),
+        "http": django_application,
         "websocket": URLRouter(routing.websocket_urlpatterns)
     }
 )

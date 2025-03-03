@@ -1,3 +1,4 @@
+from typing import List, Union
 from django.contrib.auth.models import (UserManager)
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -133,9 +134,14 @@ class GetUserManager(UserManager):
         """
         return self.get(phone=phone)
 
-    def query_id(self, query_id):
+    def query_id(
+        self, query_id: Union[str, List[str]]
+    ) -> Union[dict, List[dict]]:
         try:
-            return self.get(query_id=query_id)
+            if isinstance(query_id, str):
+                return self.get(query_id=query_id)
+            elif isinstance(query_id, list):
+                return self.filter(query_id__in=query_id)
         except Exception as e:
             # setting error messages for user nad developer respectively
             field_message = "Server Error. Contact Customer Support."

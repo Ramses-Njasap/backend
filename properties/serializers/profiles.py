@@ -7,7 +7,7 @@ from accounts.serializers.profiles import (
 )
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField()
     last_name = serializers.SerializerMethodField()
 
@@ -55,3 +55,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+    def partial_update(self, instance, validated_data):
+        """Handles partial update of a Profile instance (PATCH)."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+    def delete(self, instance):
+        """Handles deletion of a Profile instance (DELETE)."""
+        instance.delete()
