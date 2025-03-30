@@ -32,7 +32,7 @@ class ExchangeRates:
         print(f"Fetching exchange rates from: {url}")
 
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=60)
             response.raise_for_status()
             data = response.json()
             return data.get('conversion_rates', {})
