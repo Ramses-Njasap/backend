@@ -2,6 +2,7 @@ from django.core.cache import cache
 from django.conf import settings
 from decimal import Decimal
 import requests
+from security import safe_requests
 
 # Define a timeout value (1 month)
 ONE_MONTH_TIMEOUT = 30 * 24 * 60 * 60  # 1 month
@@ -32,7 +33,7 @@ class ExchangeRates:
         print(f"Fetching exchange rates from: {url}")
 
         try:
-            response = requests.get(url)
+            response = safe_requests.get(url)
             response.raise_for_status()
             data = response.json()
             return data.get('conversion_rates', {})

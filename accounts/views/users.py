@@ -37,6 +37,7 @@ import time
 import requests
 import threading
 import secrets
+from security import safe_requests
 
 
 # Load Application Settings
@@ -214,7 +215,7 @@ class UserAPIView(APIView):
         try:
             # Perform the geolocation lookup
             url = f"https://ipinfo.io/{user_ip}/json/"
-            res = requests.get(url)
+            res = safe_requests.get(url)
             geolocation_data = res.json()
             callback(device_meta_info=device_meta_info,
                      geolocation_data=geolocation_data, user_ip=user_ip,
